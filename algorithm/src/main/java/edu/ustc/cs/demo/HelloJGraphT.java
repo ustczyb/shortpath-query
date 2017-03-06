@@ -8,6 +8,7 @@ import org.jgrapht.graph.SimpleGraph;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 
 /**
  * Created by zyb on 2017/2/22.
@@ -26,7 +27,10 @@ public final class HelloJGraphT
     public static void main(String[] args)
     {
         UndirectedGraph<String, DefaultEdge> stringGraph = createStringGraph();
-
+        Set<DefaultEdge> set = stringGraph.edgesOf("v1");
+        for(DefaultEdge edge : set){
+            System.out.println(edge);
+        }
         // note undirected edges are printed as: {<v1>,<v2>}
         System.out.println(stringGraph.toString());
 

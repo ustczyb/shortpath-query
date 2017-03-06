@@ -1,4 +1,4 @@
-package edu.ustc.cs.model;
+package edu.ustc.cs.model.graph;
 
 /**
  * Created by zyb on 2017/2/22.

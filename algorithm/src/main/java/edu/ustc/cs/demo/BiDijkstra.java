@@ -1,28 +1,35 @@
 package edu.ustc.cs.demo;
 
+import edu.ustc.cs.model.edge.Edge;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 
 /**
  * Created by zyb on 2017/2/28.
  */
-public class BiDijkstra<V,E> {
+public class BiDijkstra<V,E extends Edge> implements ShortestPathAlgorithm<V,E> {
 
     private Graph<V,E> graph;
-    private DijkstraShortestPath<V,E> dijkstra;
+    private GraphPath<V,E> path;
 
     public BiDijkstra(Graph<V, E> graph) {
         this.graph = graph;
-        dijkstra = new DijkstraShortestPath<V, E>(graph);
     }
 
-    public GraphPath<V,E> getShortPath(V v1, V v2) {
 
-
+    @Override
+    public GraphPath getPath(V v1, V v2) {
         return null;
     }
 
+    @Override
+    public double getPathWeight(V v1, V v2) {
+        return 0;
+    }
 
-
+    @Override
+    public SingleSourcePaths getPaths(V v) {
+        return null;
+    }
 }
