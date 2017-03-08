@@ -5,6 +5,9 @@ import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.ShortCut;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.WeightedGraph;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
+import org.jgrapht.alg.shortestpath.BidirectionalDijkstraShortestPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.*;
@@ -12,13 +15,13 @@ import java.util.*;
 /**
  * Created by zyb on 2017/2/22.
  */
-public class CH<V, E extends Edge> {
+public class CH<V, E extends Edge> implements ShortestPathAlgorithm<V,E> {
 
     private List<V> order;
-    private Graph<V, Edge> graph;
+    private WeightedGraph<V, Edge> graph;
     private DijkstraShortestPath<V, Edge> dijkstra;
 
-    public CH(List<V> order, Graph<V, Edge> graph) {
+    public CH(List<V> order, WeightedGraph<V, Edge> graph) {
         this.order = order;
         this.graph = graph;
         dijkstra = new DijkstraShortestPath<V, Edge>(graph);
@@ -58,7 +61,28 @@ public class CH<V, E extends Edge> {
     }
 
     public GraphPath<V,E> queryShortPath(V v1, V v2){
+        Set<V> vexs = graph.vertexSet();
+        int min = Math.min(order.indexOf(v1),order.indexOf(v2));
+        for(V v : vexs){
+            if(order.indexOf(v) < min){
+                graph.removeVertex(v);
+            }
+        }
         return null;
     }
 
+    @Override
+    public GraphPath<V, E> getPath(V source, V sink) {
+        return null;
+    }
+
+    @Override
+    public double getPathWeight(V source, V sink) {
+        return 0;
+    }
+
+    @Override
+    public SingleSourcePaths<V, E> getPaths(V source) {
+        return null;
+    }
 }
