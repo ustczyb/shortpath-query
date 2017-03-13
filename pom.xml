@@ -18,6 +18,8 @@
     <modules>
         <module>generator</module>
         <module>algorithm</module>
+        <module>app</module>
+        <module>app</module>
     </modules>
 
     <dependencies>
@@ -26,6 +28,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>${spring-framework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.4.2</version>
         </dependency>
 
         <!-- spring-webmvc -->

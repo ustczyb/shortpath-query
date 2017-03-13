@@ -1,9 +1,12 @@
 package edu.ustc.cs.model.edge;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 /**
  * Created by zyb on 2017/3/1.
+ * jGraphT中有向边必须继承DefaultWeightedEdge并且重写getWeight方法，否则在使用jGraphT中的计算边权重的算法时边的权重为默认值1
  */
-public class WeightEdge<V> implements Edge<V> {
+public class WeightEdge<V> extends DefaultWeightedEdge implements Edge<V> {
 
     private V source;
     private V target;
@@ -44,7 +47,7 @@ public class WeightEdge<V> implements Edge<V> {
     }
 
     @Override
-    public Double length() {
+    public double getWeight(){
         return length;
     }
 }

@@ -1,13 +1,14 @@
 package edu.ustc.cs.model.edge;
 
 import edu.ustc.cs.model.edge.Edge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import java.util.List;
 
 /**
  * Created by zyb on 2017/3/1.
  */
-public class ShortCut<V> implements Edge<V> {
+public class ShortCut<V> extends DefaultWeightedEdge implements Edge<V> {
 
     private Double length;
     private List<V> path;
@@ -68,7 +69,7 @@ public class ShortCut<V> implements Edge<V> {
     }
 
     @Override
-    public Double length() {
+    public double getWeight() {
         return length;
     }
 

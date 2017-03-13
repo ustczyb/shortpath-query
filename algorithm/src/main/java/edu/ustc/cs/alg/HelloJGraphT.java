@@ -1,4 +1,4 @@
-package edu.ustc.cs.demo;
+package edu.ustc.cs.alg;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.UndirectedGraph;

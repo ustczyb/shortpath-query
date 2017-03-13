@@ -1,4 +1,4 @@
-package edu.ustc.cs.alg.slic;
+package edu.ustc.cs.alg;
 
 import edu.ustc.cs.alg.ShortestPathStrategy;
 import edu.ustc.cs.model.edge.Edge;

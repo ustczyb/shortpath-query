@@ -6,9 +6,4 @@ package edu.ustc.cs.model.edge;
 public interface Edge<V> {
 
     V getAnotherVertex(V v);
-
-    /**
-     *  边的长度
-     */
-    Double length();
 }
