@@ -73,4 +73,15 @@ public class ShortCut<V> extends DefaultWeightedEdge implements Edge<V> {
         return length;
     }
 
+    @Override
+    public int compareTo(Object o) {
+        Edge e = (Edge) o;
+        if(getWeight() > e.getLength()){
+            return 1;
+        } else if(getWeight() == e.getLength()){
+            return 0;
+        } else {
+            return -1;
+        }
+    }
 }

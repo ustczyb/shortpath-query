@@ -1,32 +1,28 @@
 package edu.ustc.cs;
 
 import edu.ustc.cs.alg.CH;
+import edu.ustc.cs.alg.ChTnr;
 import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.WeightEdge;
-import org.jgrapht.GraphPath;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.Before; 
-import org.junit.After;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
-/** 
-* CH Tester. 
-* 
-* @author <Authors name> 
-* @since <pre>���� 1, 2017</pre> 
-* @version 1.0 
-*/ 
-public class CHTest {
-
+/**
+ * Created by zyb on 2017/3/13.
+ */
+public class ChTnrTest {
     WeightedGraph<Integer, Edge> graph;
-    CH<Integer,Edge> ch;
+    ChTnr<Integer,Edge> chTnr;
 
     @Before
     public void before() throws Exception {
@@ -48,36 +44,26 @@ public class CHTest {
             graph.addEdge(v,w,edge);
         }
         in.close();
-        ch = new CH<>(order,graph);
-        ch.init();
+        chTnr = new ChTnr<Integer, Edge>(graph,order);
     }
 
-    @After
-    public void after() throws Exception {
-    }
-
-    /**
-    *
-    * Method: init()
-    *
-    */
     @Test
-    public void testInit() throws Exception {
-
-        System.out.println(graph);
+    public void test(){
+        if(graph instanceof DirectedGraph){
+            System.out.println(((DirectedGraph) graph).outgoingEdgesOf(7));
+        } else{
+            System.out.println(graph.edgesOf(7));
+        }
     }
 
-    /**
-    *
-    * Method: queryShortPath(V v1, V v2)
-    *
-    */
     @Test
-    public void testQueryShortPath() throws Exception {
- //       GraphPath<Integer,Edge> path = ch.getGraphPath(4,2);
-        List<Integer> list = ch.getPath(4,2);
+    public void testFindForwardAccessNode(){
+        Set list = chTnr.findForwardAccessNode(7);
         System.out.println(list);
-        System.out.println(ch.getGraphPath(4, 2).getVertexList());
     }
-
-} 
+    @Test
+    public void testFindBackwardAccessNode(){
+        Set list = chTnr.findBackwardAccessNode(7);
+        System.out.println(list);
+    }
+}
