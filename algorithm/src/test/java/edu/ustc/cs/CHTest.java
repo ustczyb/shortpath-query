@@ -32,7 +32,7 @@ public class CHTest {
     public void before() throws Exception {
         List<Integer> order = new ArrayList<>();
         graph = new DefaultDirectedWeightedGraph<Integer, Edge>(WeightEdge.class);
-        File input = new File("F:\\java\\algs4-data\\algs4-data\\tinyEWD.txt");
+        File input = new File("F:\\java\\algs4-data\\algs4-data\\mediumEWD.txt");
         Scanner in = new Scanner(input);
         int num = in.nextInt();
         for(int i = 0; i < num; i++){           //添加顶点
@@ -75,9 +75,16 @@ public class CHTest {
     @Test
     public void testQueryShortPath() throws Exception {
  //       GraphPath<Integer,Edge> path = ch.getGraphPath(4,2);
-        List<Integer> list = ch.getPath(4,2);
-        System.out.println(list);
-        System.out.println(ch.getGraphPath(4, 2).getVertexList());
+        for(Integer v : graph.vertexSet()){
+            for(Integer w : graph.vertexSet()){
+                if(!v.equals(w)){
+                    List<Edge> list = ch.getPathEdges(v,w);
+                    System.out.println(list);
+                }
+            }
+        }
+
+//        System.out.println(ch.getPath(4, 2));
     }
 
 } 

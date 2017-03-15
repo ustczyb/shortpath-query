@@ -52,15 +52,26 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     V vi = list.get(i);
                     V vj = list.get(j);
                     GraphPath graphPath = dijkstra.getPath(vi,vj);
-                    List<V> path = graphPath.getEdgeList();
-
+                    List<V> path = graphPath.getVertexList();
                     Double length = graphPath.getWeight();
                     if(path.contains(v)){
 
+                        List<Edge> edgeList = graphPath.getEdgeList();
                         ShortCut<V> shortCut = new ShortCut<V>();
                         shortCut.setSource(vi);
                         shortCut.setTarget(vj);
-                        shortCut.setPath(path);         //可能会出现shortcut中嵌套shortcut的情况，即shortcut返回的path是不可行的
+                        //可能会出现shortcut中嵌套shortcut的情况，即shortcut返回的path是不可行的
+                        List<V> vList = new ArrayList<V>();
+                        for(Edge<V> e : edgeList){
+                            if(e instanceof ShortCut){
+                                vList.addAll(((ShortCut) e).getPath());
+                                vList.remove(vList.size()-1);
+                            } else {
+                                vList.add(e.getSource());
+                            }
+                        }
+                        vList.add(vj);
+                        shortCut.setPath(vList);
                         shortCut.setLength(length);
 
                         graph.addEdge(vi,vj,shortCut);
@@ -126,7 +137,12 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
 
     @Override
     public List<V> getPath(V source, V sink){
-        return getInstense().getPath(source, sink);
+        return getInstense().getPathVertexs(source, sink);
+    }
+
+
+    public List<Edge> getPathEdges(V source, V sink){
+        return getInstense().getPathEdges(source, sink);
     }
 
     public GraphPath<V, Edge> getGraphPath(V source, V sink) {
@@ -188,7 +204,22 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
             return vertexToInteger.get(v);
         }
 
-        public List<V> getPath(V source, V sink){
+        public List<V> getPathVertexs(V source, V sink){
+            List<V> list = new ArrayList<V>();
+            List<Edge> edges = getPathEdges(source, sink);
+            for(Edge<V> e : edges){
+                if(e instanceof ShortCut){
+                    list.addAll(((ShortCut) e).getPath());
+                    list.remove(list.size() - 1);
+                } else {
+                    list.add(e.getSource());
+                }
+            }
+            list.add(sink);
+            return list;
+        }
+
+        public List<Edge> getPathEdges(V source, V sink){
 
             fordDistTo = new double[numOfVertex];
             fordVexTo = (V[]) new Object[numOfVertex];
@@ -206,7 +237,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
             backDistTo[indexOfVertex(sink)] = 0.0;
             backVexTo[indexOfVertex(sink)] = sink;
 
-            List<V> result = new ArrayList<V>();
+            List<Edge> result = new ArrayList<Edge>();
             List<V> sourceList = new ArrayList<V>();        //从source搜索过的节点
             List<V> sinkList = new ArrayList<V>();
 
@@ -221,11 +252,10 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     V sourceV = sourceQueue.poll().getTarget();
                     if(sinkList.contains(sourceV)){
                         V v = sourceV;
-                        result.add(v);
                         int index = indexOfVertex(sourceV);
                         while(!v.equals(fordVexTo[index])){
                             v = fordVexTo[index];
-                            result.add(v);
+                            result.add(fordEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
                         Collections.reverse(result);
@@ -233,7 +263,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                         index = indexOfVertex(v);
                         while(!v.equals(backVexTo[indexOfVertex(v)])){
                             v = backVexTo[indexOfVertex(v)];
-                            result.add(v);
+                            result.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
                         return result;
@@ -247,11 +277,10 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     V sinkV = sinkQueue.poll().getSource();
                     if(sourceList.contains(sinkV)){
                         V v = sinkV;
-                        result.add(v);
                         int index = indexOfVertex(sinkV);
                         while(!v.equals(fordVexTo[index])){
                             v = fordVexTo[index];
-                            result.add(v);
+                            result.add(fordEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
                         Collections.reverse(result);
@@ -259,7 +288,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                         index = indexOfVertex(v);
                         while(!v.equals(backVexTo[indexOfVertex(v)])){
                             v = backVexTo[indexOfVertex(v)];
-                            result.add(v);
+                            result.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
                         return result;
