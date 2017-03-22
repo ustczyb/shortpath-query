@@ -47,6 +47,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     list.add((V) e.getAnotherVertex(v));
                 }
             }
+            // TODO 可优化 只计算那些有到达v的有向边的点即可，无需遍历所有顶点
             for(int i = 0; i < list.size(); i ++){
                 for(int j = i+1; j < list.size(); j++){
                     V vi = list.get(i);

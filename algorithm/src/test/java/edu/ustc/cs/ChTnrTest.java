@@ -58,12 +58,12 @@ public class ChTnrTest {
 
     @Test
     public void testFindForwardAccessNode(){
-        Set list = chTnr.findForwardAccessNode(7);
+        Set list = chTnr.findForwardAccessNode(4);
         System.out.println(list);
     }
     @Test
     public void testFindBackwardAccessNode(){
-        Set list = chTnr.findBackwardAccessNode(7);
+        Set list = chTnr.findBackwardAccessNode(4);
         System.out.println(list);
     }
 }

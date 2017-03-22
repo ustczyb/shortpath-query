@@ -5,6 +5,7 @@ import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.WeightEdge;
 import org.jgrapht.GraphPath;
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Test;
@@ -27,6 +28,7 @@ public class CHTest {
 
     WeightedGraph<Integer, Edge> graph;
     CH<Integer,Edge> ch;
+    long starttime;
 
     @Before
     public void before() throws Exception {
@@ -48,8 +50,17 @@ public class CHTest {
             graph.addEdge(v,w,edge);
         }
         in.close();
+
+        starttime = System.currentTimeMillis();
+        DijkstraShortestPath dijkstraShortestPath = new DijkstraShortestPath(graph);
+        GraphPath path1 = dijkstraShortestPath.getPath(4,2);
+        long endTime = System.currentTimeMillis();
+        System.out.println(path1.getVertexList());
+        System.out.println(endTime - starttime);
+
         ch = new CH<>(order,graph);
         ch.init();
+        starttime = System.currentTimeMillis();
     }
 
     @After
@@ -74,17 +85,20 @@ public class CHTest {
     */
     @Test
     public void testQueryShortPath() throws Exception {
- //       GraphPath<Integer,Edge> path = ch.getGraphPath(4,2);
-        for(Integer v : graph.vertexSet()){
-            for(Integer w : graph.vertexSet()){
-                if(!v.equals(w)){
-                    List<Edge> list = ch.getPathEdges(v,w);
-                    System.out.println(list);
-                }
-            }
-        }
+        GraphPath<Integer,Edge> path = ch.getGraphPath(4,2);
+//        for(Integer v : graph.vertexSet()){
+//            for(Integer w : graph.vertexSet()){
+//                if(!v.equals(w)){
+//                    List<Edge> list = ch.getPathEdges(v,w);
+//                    System.out.println(list);
+//                }
+//            }
+//        }
 
-//        System.out.println(ch.getPath(4, 2));
+        System.out.println(ch.getPath(4, 2));
+        long endTime;
+        endTime = System.currentTimeMillis();
+        System.out.println(endTime - starttime);
     }
 
 } 
