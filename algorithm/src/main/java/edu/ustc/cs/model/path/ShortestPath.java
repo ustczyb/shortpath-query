@@ -21,8 +21,18 @@ public class ShortestPath<V, E extends Edge> implements Path<V, E> {
         this.weight = weight;
     }
 
-    public ShortestPath(List<V> vertexList) {
-        this.vertexList = vertexList;
+    public ShortestPath(List<E> edgeList) {
+        this.edgeList = edgeList;
+        vertexList = new ArrayList<V>();
+        weight = 0.0;
+        for(int i = 0; i < edgeList.size(); i++){
+            Edge edge = edgeList.get(i);
+            weight += edge.getLength();
+            vertexList.addAll(edge.getVertexs());
+            if(i < edgeList.size() -1){
+                vertexList.remove(vertexList.size() - 1);
+            }
+        }
     }
 
     @Override

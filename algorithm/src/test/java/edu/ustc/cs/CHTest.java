@@ -6,6 +6,7 @@ import edu.ustc.cs.model.edge.WeightEdge;
 import org.jgrapht.GraphPath;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class CHTest {
     public void before() throws Exception {
         List<Integer> order = new ArrayList<>();
         graph = new DefaultDirectedWeightedGraph<Integer, Edge>(WeightEdge.class);
-        File input = new File("F:\\java\\algs4-data\\algs4-data\\mediumEWD.txt");
+        File input = new File("F:\\java\\algs4-data\\algs4-data\\tinyEWD.txt");
         Scanner in = new Scanner(input);
         int num = in.nextInt();
         for(int i = 0; i < num; i++){           //添加顶点
@@ -51,16 +52,8 @@ public class CHTest {
         }
         in.close();
 
-        starttime = System.currentTimeMillis();
-        DijkstraShortestPath dijkstraShortestPath = new DijkstraShortestPath(graph);
-        GraphPath path1 = dijkstraShortestPath.getPath(4,2);
-        long endTime = System.currentTimeMillis();
-        System.out.println(path1.getVertexList());
-        System.out.println(endTime - starttime);
-
-        ch = new CH<>(order,graph);
+        ch = new CH<Integer,Edge>((AbstractBaseGraph<Integer, Edge>) graph);
         ch.init();
-        starttime = System.currentTimeMillis();
     }
 
     @After
@@ -72,10 +65,20 @@ public class CHTest {
     * Method: init()
     *
     */
+
+    @Test
+    public void testCanculateEdgeDifference() {
+        for(int i = 0; i < 8; i++){
+            int result = ch.calculateEdgeDifference(i);
+            System.out.println(result);
+        }
+
+    }
+
     @Test
     public void testInit() throws Exception {
-
-        System.out.println(graph);
+        System.out.println(ch.getOrder());
+        System.out.println(ch.getGraph());
     }
 
     /**
@@ -85,20 +88,19 @@ public class CHTest {
     */
     @Test
     public void testQueryShortPath() throws Exception {
-        GraphPath<Integer,Edge> path = ch.getGraphPath(4,2);
-//        for(Integer v : graph.vertexSet()){
-//            for(Integer w : graph.vertexSet()){
-//                if(!v.equals(w)){
-//                    List<Edge> list = ch.getPathEdges(v,w);
-//                    System.out.println(list);
-//                }
-//            }
-//        }
 
-        System.out.println(ch.getPath(4, 2));
-        long endTime;
-        endTime = System.currentTimeMillis();
-        System.out.println(endTime - starttime);
+        DijkstraShortestPath dijkstraShortestPath = new DijkstraShortestPath(graph);
+        for(Integer v : graph.vertexSet()){
+            for(Integer w : graph.vertexSet()){
+                if(!v.equals(w)){
+                    List<Integer> list = ch.getPath(v,w);
+                    System.out.println(list);
+                    System.out.println(dijkstraShortestPath.getPath(v,w).getVertexList());
+                }
+            }
+        }
+
+//        System.out.println(ch.getPath(0, 5));
     }
 
 } 

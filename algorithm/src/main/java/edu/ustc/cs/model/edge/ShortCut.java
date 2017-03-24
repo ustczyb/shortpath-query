@@ -69,6 +69,11 @@ public class ShortCut<V> extends DefaultWeightedEdge implements Edge<V> {
     }
 
     @Override
+    public List<V> getVertexs() {
+        return path;
+    }
+
+    @Override
     public double getWeight() {
         return length;
     }

@@ -9,6 +9,8 @@ public interface Edge<V> extends Comparable{
 
     V getAnotherVertex(V v);
 
+    List<V> getVertexs();
+
     V getSource();
 
     V getTarget();

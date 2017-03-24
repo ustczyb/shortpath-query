@@ -1,10 +1,13 @@
 package edu.ustc.cs.alg;
 
 
+import edu.ustc.cs.model.dto.Priority;
 import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.ShortCut;
 import edu.ustc.cs.model.edge.WeightEdge;
+import edu.ustc.cs.model.path.ShortestPath;
 import edu.ustc.cs.util.GraphUtil;
+import edu.ustc.cs.util.SortMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -12,6 +15,7 @@ import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.BidirectionalDijkstraShortestPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.alg.shortestpath.ListSingleSourcePathsImpl;
+import org.jgrapht.graph.AbstractBaseGraph;
 
 import java.util.*;
 
@@ -22,65 +26,170 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
 
     private List<V> order;
     private Graph<V, Edge> graph;
+    private Graph<V,Edge> originalGraph;
     private DijkstraShortestPath<V, Edge> dijkstra;
 
-    public CH(List<V> order, Graph<V, Edge> graph) {
+    //计算edge difference的域对象
+    private PriorityQueue<Priority> edgeDifference;
+
+    public CH(List<V> order, AbstractBaseGraph<V, Edge> graph) {
         this.order = order;
-        this.graph = graph;
+        this.originalGraph = graph;
+        this.graph = (Graph<V, Edge>) graph.clone();
         dijkstra = new DijkstraShortestPath<V, Edge>(graph);
     }
 
-    public List<V> generateOrder(Graph<V,E> graph){
-        List<V> order = new ArrayList<V>();
-        //TODO generate the order
+    public CH(AbstractBaseGraph<V, Edge> graph){
+        this.originalGraph = graph;
+        this.graph = (Graph<V, Edge>) graph.clone();
+        dijkstra = new DijkstraShortestPath<V, Edge>(graph);
+        this.order = new ArrayList<V>(graph.vertexSet().size());
+    }
+
+    public Graph getGraph(){
+        return graph;
+    }
+
+    public List<V> getOrder(){
         return order;
     }
 
-    public void init(){
-        HashSet<V> hashSet = new HashSet<V>();
-        for(V v : order){
-            hashSet.add(v);
-            Set<Edge> edges = graph.edgesOf(v);
-            List<V> list = new ArrayList<V>();          //层次低于v的相邻顶点
-            for(Edge e : edges){
-                if(!hashSet.contains(e.getAnotherVertex(v))){
-                    list.add((V) e.getAnotherVertex(v));
+    private void contract(V v){
+        Set<Edge> inCommingEdges = getInCommingEdges(v);
+        Set<Edge> outGoningEdges = getOutGoingEdges(v);
+        for(Edge inCommingEdge : inCommingEdges){
+            V u = (V) inCommingEdge.getSource();
+            if(order.contains(u)){
+                continue;
+            }
+            for(Edge outGoningEdge : outGoningEdges){
+                V w = (V) outGoningEdge.getTarget();
+                if(order.contains(w) || w == u){
+                    continue;
+                }
+                Edge u2w = graph.getEdge(u,w);
+                double weight = inCommingEdge.getLength() + outGoningEdge.getLength();
+                if(u2w == null || u2w.getLength() > weight){
+                    if(u2w != null){
+                        graph.removeEdge(u2w);
+                    }
+                    //add shortcut
+                    ShortCut<V> shortCut = new ShortCut<V>();
+                    shortCut.setSource(u);
+                    shortCut.setTarget(w);
+                    shortCut.setLength(weight);
+                    List<V> list = new ArrayList<V>();
+                    list.addAll(inCommingEdge.getVertexs());
+                    list.remove(list.size() - 1);
+                    list.addAll(outGoningEdge.getVertexs());
+                    shortCut.setPath(list);
+                    graph.addEdge(u,w,shortCut);
+                } else {
+                    continue;
                 }
             }
-            // TODO 可优化 只计算那些有到达v的有向边的点即可，无需遍历所有顶点
-            for(int i = 0; i < list.size(); i ++){
-                for(int j = i+1; j < list.size(); j++){
-                    V vi = list.get(i);
-                    V vj = list.get(j);
-                    GraphPath graphPath = dijkstra.getPath(vi,vj);
-                    List<V> path = graphPath.getVertexList();
-                    Double length = graphPath.getWeight();
-                    if(path.contains(v)){
+        }
+        order.add(v);
+    }
 
-                        List<Edge> edgeList = graphPath.getEdgeList();
-                        ShortCut<V> shortCut = new ShortCut<V>();
-                        shortCut.setSource(vi);
-                        shortCut.setTarget(vj);
-                        //可能会出现shortcut中嵌套shortcut的情况，即shortcut返回的path是不可行的
-                        List<V> vList = new ArrayList<V>();
-                        for(Edge<V> e : edgeList){
-                            if(e instanceof ShortCut){
-                                vList.addAll(((ShortCut) e).getPath());
-                                vList.remove(vList.size()-1);
-                            } else {
-                                vList.add(e.getSource());
-                            }
-                        }
-                        vList.add(vj);
-                        shortCut.setPath(vList);
-                        shortCut.setLength(length);
+    /*
+    计算顶点v的edge difference
+     */
+    public int calculateEdgeDifference(V v){
+        int count = 0;
+        Set<Edge> inCommingEdges = getInCommingEdges(v);
+        Set<Edge> outGoningEdges = getOutGoingEdges(v);
+        for(Edge outGoingEdge : outGoningEdges){
+            V w = (V) outGoingEdge.getTarget();
+            if(order.contains(w)){
+                continue;
+            }
+            count --;
+        }
+        for(Edge inCommingEdge : inCommingEdges){
+            V u = (V) inCommingEdge.getSource();
+            if(order.contains(u)){
+                continue;
+            }
+            count --;
+            for(Edge outGoingEdge : outGoningEdges){
+                V w = (V) outGoingEdge.getTarget();
+                if(order.contains(w)){
+                    continue;
+                }
+                Edge u2w = graph.getEdge(u,w);
+                if(u2w == null){
+                    count ++;
+                } else {
+                    continue;
+                }
+            }
+        }
+        return count;
+    }
 
-                        graph.addEdge(vi,vj,shortCut);
-                    }
+    public void init(){
+        SortMap<V, Integer> sortMap = new SortMap<V, Integer>();
+        for(V v : graph.vertexSet()){
+            sortMap.put(v,calculateEdgeDifference(v));
+        }
+        while (!sortMap.isEmpty()){
+            V nextOrderedVertex = sortMap.removeFirst();
+            contract(nextOrderedVertex);
+            for(Edge edge : graph.edgesOf(nextOrderedVertex)){
+                V adjVertex = (V) edge.getAnotherVertex(nextOrderedVertex);
+                if(!order.contains(adjVertex)){
+                    sortMap.put(adjVertex,calculateEdgeDifference(adjVertex));
                 }
             }
         }
     }
+
+//    public void init(){
+//        HashSet<V> hashSet = new HashSet<V>();
+//        for(V v : order){
+//            hashSet.add(v);
+//            Set<Edge> edges = graph.edgesOf(v);
+//            List<V> list = new ArrayList<V>();          //层次低于v的相邻顶点
+//            for(Edge e : edges){
+//                if(!hashSet.contains(e.getAnotherVertex(v))){
+//                    list.add((V) e.getAnotherVertex(v));
+//                }
+//            }
+//            // TODO 可优化 只计算那些有到达v的有向边的点即可，无需遍历所有顶点
+//            for(int i = 0; i < list.size(); i ++){
+//                for(int j = i+1; j < list.size(); j++){
+//                    V vi = list.get(i);
+//                    V vj = list.get(j);
+//                    GraphPath graphPath = dijkstra.getPath(vi,vj);
+//                    List<V> path = graphPath.getVertexList();
+//                    Double length = graphPath.getWeight();
+//                    if(path.contains(v)){
+//
+//                        List<Edge> edgeList = graphPath.getEdgeList();
+//                        ShortCut<V> shortCut = new ShortCut<V>();
+//                        shortCut.setSource(vi);
+//                        shortCut.setTarget(vj);
+//                        //可能会出现shortcut中嵌套shortcut的情况，即shortcut返回的path是不可行的
+//                        List<V> vList = new ArrayList<V>();
+//                        for(Edge<V> e : edgeList){
+//                            if(e instanceof ShortCut){
+//                                vList.addAll(((ShortCut) e).getPath());
+//                                vList.remove(vList.size()-1);
+//                            } else {
+//                                vList.add(e.getSource());
+//                            }
+//                        }
+//                        vList.add(vj);
+//                        shortCut.setPath(vList);
+//                        shortCut.setLength(length);
+//
+//                        graph.addEdge(vi,vj,shortCut);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private boolean isForwardEdge(Edge<V> edge){
         if(order.indexOf(edge.getSource()) < order.indexOf(edge.getTarget())){
@@ -143,7 +252,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
 
 
     public List<Edge> getPathEdges(V source, V sink){
-        return getInstense().getPathEdges(source, sink);
+        return getInstense().getPath(source, sink).getEdgeList();
     }
 
     public GraphPath<V, Edge> getGraphPath(V source, V sink) {
@@ -206,21 +315,22 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         }
 
         public List<V> getPathVertexs(V source, V sink){
-            List<V> list = new ArrayList<V>();
-            List<Edge> edges = getPathEdges(source, sink);
-            for(Edge<V> e : edges){
-                if(e instanceof ShortCut){
-                    list.addAll(((ShortCut) e).getPath());
-                    list.remove(list.size() - 1);
-                } else {
-                    list.add(e.getSource());
-                }
-            }
-            list.add(sink);
-            return list;
+            return getPath(source, sink).getVertexList();
+//            List<V> list = new ArrayList<V>();
+//            List<Edge> edges = getPath(source, sink);
+//            for(Edge<V> e : edges){
+//                if(e instanceof ShortCut){
+//                    list.addAll(((ShortCut) e).getPath());
+//                    list.remove(list.size() - 1);
+//                } else {
+//                    list.add(e.getSource());
+//                }
+//            }
+//            list.add(sink);
+//            return list;
         }
 
-        public List<Edge> getPathEdges(V source, V sink){
+        public ShortestPath getPath(V source, V sink){
 
             fordDistTo = new double[numOfVertex];
             fordVexTo = (V[]) new Object[numOfVertex];
@@ -238,7 +348,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
             backDistTo[indexOfVertex(sink)] = 0.0;
             backVexTo[indexOfVertex(sink)] = sink;
 
-            List<Edge> result = new ArrayList<Edge>();
+            ShortestPath result = null;
             List<V> sourceList = new ArrayList<V>();        //从source搜索过的节点
             List<V> sinkList = new ArrayList<V>();
 
@@ -247,30 +357,39 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
             sourceQueue.add(new WeightEdge(source, source,0.0));
             sinkQueue.add(new WeightEdge(sink, sink, 0.0));
 
+            //双向搜索需要注意的一点是：当前向搜索路径和后向搜索路径相遇时并不意味着找到了最短路径
+            //只有当前向和后向的优先队列均排空才意味着搜索结束
             while(!sourceQueue.isEmpty() || !sinkQueue.isEmpty()){
                 //source搜索
                 if(!sourceQueue.isEmpty()){
                     V sourceV = sourceQueue.poll().getTarget();
+                    //前向搜索与后向搜索相遇，记录下这条路径
                     if(sinkList.contains(sourceV)){
                         V v = sourceV;
                         int index = indexOfVertex(sourceV);
+                        List<Edge> edgeList = new ArrayList<Edge>();
                         while(!v.equals(fordVexTo[index])){
                             v = fordVexTo[index];
-                            result.add(fordEdgeTo[index]);
+                            edgeList.add(fordEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        Collections.reverse(result);
+                        Collections.reverse(edgeList);
                         v = sourceV;
                         index = indexOfVertex(v);
                         while(!v.equals(backVexTo[indexOfVertex(v)])){
                             v = backVexTo[indexOfVertex(v)];
-                            result.add(backEdgeTo[index]);
+                            edgeList.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        return result;
+                        ShortestPath path = new ShortestPath(edgeList);
+                        if(result == null || result.getWeight() > path.getWeight()){
+                            result = path;
+                        }
+                    } else{
+                        sourceList.add(sourceV);
+                        relax(sourceV, sourceQueue, true);
                     }
-                    sourceList.add(sourceV);
-                    relax(sourceV, sourceQueue, true);
+
                 }
 
                 //sink搜索
@@ -279,20 +398,24 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     if(sourceList.contains(sinkV)){
                         V v = sinkV;
                         int index = indexOfVertex(sinkV);
+                        List<Edge> edgeList = new ArrayList<Edge>();
                         while(!v.equals(fordVexTo[index])){
                             v = fordVexTo[index];
-                            result.add(fordEdgeTo[index]);
+                            edgeList.add(fordEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        Collections.reverse(result);
+                        Collections.reverse(edgeList);
                         v = sinkV;
                         index = indexOfVertex(v);
                         while(!v.equals(backVexTo[indexOfVertex(v)])){
                             v = backVexTo[indexOfVertex(v)];
-                            result.add(backEdgeTo[index]);
+                            edgeList.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        return result;
+                        ShortestPath path = new ShortestPath(edgeList);
+                        if(result == null || result.getWeight() > path.getWeight()){
+                            result = path;
+                        }
                     }
                     sinkList.add(sinkV);
                     relax(sinkV, sinkQueue, false);
