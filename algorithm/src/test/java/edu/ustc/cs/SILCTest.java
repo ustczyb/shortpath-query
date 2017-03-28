@@ -47,7 +47,7 @@ public class SILCTest {
 
     @Test
     public void testGetPath(){
-        System.out.println(silc.getPath(4,2));
+        System.out.println(silc.getPathVertex(4,2));
     }
 
 }

@@ -6,6 +6,7 @@ import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.WeightEdge;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.WeightedGraph;
+import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Before;
@@ -26,14 +27,12 @@ public class ChTnrTest {
 
     @Before
     public void before() throws Exception {
-        List<Integer> order = new ArrayList<>();
         graph = new DefaultDirectedWeightedGraph<Integer, Edge>(WeightEdge.class);
-        File input = new File("F:\\java\\algs4-data\\algs4-data\\tinyEWD.txt");
+        File input = new File("F:\\java\\algs4-data\\algs4-data\\mediumEWD.txt");
         Scanner in = new Scanner(input);
         int num = in.nextInt();
         for(int i = 0; i < num; i++){           //添加顶点
             graph.addVertex(i);
-            order.add(i);
         }
         in.nextInt();
         while (in.hasNext()){  //录入边
@@ -44,7 +43,10 @@ public class ChTnrTest {
             graph.addEdge(v,w,edge);
         }
         in.close();
-        chTnr = new ChTnr<Integer, Edge>(graph,order);
+        chTnr = new ChTnr<Integer, Edge>((AbstractBaseGraph<Integer, Edge>) graph);
+        System.out.println("init method run ...");
+        chTnr.init();
+        System.out.println("init method end ...");
     }
 
     @Test
@@ -58,12 +60,19 @@ public class ChTnrTest {
 
     @Test
     public void testFindForwardAccessNode(){
-        Set list = chTnr.findForwardAccessNode(4);
+        Set list = chTnr.findForwardAccessNode(8);
+        System.out.println(chTnr.getTransNodes());
         System.out.println(list);
     }
     @Test
     public void testFindBackwardAccessNode(){
-        Set list = chTnr.findBackwardAccessNode(4);
+        Set list = chTnr.findBackwardAccessNode(2);
         System.out.println(list);
     }
+
+    @Test
+    public void testQuery(){
+        System.out.println(chTnr.getPathVertex(4, 2));
+    }
+
 }

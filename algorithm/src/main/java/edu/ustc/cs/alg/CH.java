@@ -145,52 +145,6 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         }
     }
 
-//    public void init(){
-//        HashSet<V> hashSet = new HashSet<V>();
-//        for(V v : order){
-//            hashSet.add(v);
-//            Set<Edge> edges = graph.edgesOf(v);
-//            List<V> list = new ArrayList<V>();          //层次低于v的相邻顶点
-//            for(Edge e : edges){
-//                if(!hashSet.contains(e.getAnotherVertex(v))){
-//                    list.add((V) e.getAnotherVertex(v));
-//                }
-//            }
-//            // TODO 可优化 只计算那些有到达v的有向边的点即可，无需遍历所有顶点
-//            for(int i = 0; i < list.size(); i ++){
-//                for(int j = i+1; j < list.size(); j++){
-//                    V vi = list.get(i);
-//                    V vj = list.get(j);
-//                    GraphPath graphPath = dijkstra.getPath(vi,vj);
-//                    List<V> path = graphPath.getVertexList();
-//                    Double length = graphPath.getWeight();
-//                    if(path.contains(v)){
-//
-//                        List<Edge> edgeList = graphPath.getEdgeList();
-//                        ShortCut<V> shortCut = new ShortCut<V>();
-//                        shortCut.setSource(vi);
-//                        shortCut.setTarget(vj);
-//                        //可能会出现shortcut中嵌套shortcut的情况，即shortcut返回的path是不可行的
-//                        List<V> vList = new ArrayList<V>();
-//                        for(Edge<V> e : edgeList){
-//                            if(e instanceof ShortCut){
-//                                vList.addAll(((ShortCut) e).getPath());
-//                                vList.remove(vList.size()-1);
-//                            } else {
-//                                vList.add(e.getSource());
-//                            }
-//                        }
-//                        vList.add(vj);
-//                        shortCut.setPath(vList);
-//                        shortCut.setLength(length);
-//
-//                        graph.addEdge(vi,vj,shortCut);
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     private boolean isForwardEdge(Edge<V> edge){
         if(order.indexOf(edge.getSource()) < order.indexOf(edge.getTarget())){
             return true;
@@ -245,8 +199,11 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         return new BiDijkstra();
     }
 
-    @Override
-    public List<V> getPath(V source, V sink){
+    public ShortestPath getPath(V source, V sink){
+        return  getInstense().getPath(source, sink);
+    }
+
+    public List<V> getPathVertex(V source, V sink){
         return getInstense().getPathVertexs(source, sink);
     }
 
@@ -264,7 +221,6 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                 list.add(v);
             }
         }
-        //TODO 可优化 手写双向dijstra算法可以减少图的复制操作
         graph.removeAllVertices(list);
         BidirectionalDijkstraShortestPath<V,Edge> bidirectionalDijkstraShortestPath = new BidirectionalDijkstraShortestPath<V, Edge>(graph);
         return bidirectionalDijkstraShortestPath.getPath(source,sink);
@@ -317,10 +273,10 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         public List<V> getPathVertexs(V source, V sink){
             return getPath(source, sink).getVertexList();
 //            List<V> list = new ArrayList<V>();
-//            List<Edge> edges = getPath(source, sink);
+//            List<Edge> edges = getPathVertex(source, sink);
 //            for(Edge<V> e : edges){
 //                if(e instanceof ShortCut){
-//                    list.addAll(((ShortCut) e).getPath());
+//                    list.addAll(((ShortCut) e).getPathVertex());
 //                    list.remove(list.size() - 1);
 //                } else {
 //                    list.add(e.getSource());
@@ -331,6 +287,12 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         }
 
         public ShortestPath getPath(V source, V sink){
+
+            if(source == sink){
+                List<V> list = new ArrayList<V>(1);
+                list.add(source);
+                return new ShortestPath(list,null,0.0);
+            }
 
             fordDistTo = new double[numOfVertex];
             fordVexTo = (V[]) new Object[numOfVertex];

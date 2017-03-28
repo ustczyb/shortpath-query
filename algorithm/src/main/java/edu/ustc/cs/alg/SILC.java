@@ -1,11 +1,10 @@
 package edu.ustc.cs.alg;
 
 import edu.ustc.cs.model.edge.Edge;
+import edu.ustc.cs.model.path.ShortestPath;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.GraphWalk;
 
 import java.util.*;
 
@@ -50,7 +49,7 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
     }
 
     @Override
-    public List<V> getPath(V source, V sink) {
+    public List<V> getPathVertex(V source, V sink) {
         if(source == sink){
             List<V> path = new ArrayList<V>();
             path.add(source);
@@ -60,7 +59,7 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
             for(V v : table.keySet()){
                 HashSet<V> set = table.get(v);
                 if(set.contains(sink)){
-                    List<V> list =  getPath(v,sink);
+                    List<V> list =  getPathVertex(v,sink);
                     list.add(source);
                     return list;
                 }

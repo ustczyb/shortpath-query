@@ -5,6 +5,7 @@ import edu.ustc.cs.model.path.Path;
 import edu.ustc.cs.model.path.ShortestPath;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
+import org.jgrapht.graph.AbstractBaseGraph;
 
 import java.util.*;
 
@@ -20,33 +21,73 @@ public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
     private Hashtable<V,Integer> vertexToInteger;
     private int numOfVertex;
 
+    private CH ch;
+
     private Hashtable<V, Hashtable<V, Path>> forwardAccessNodeTable;
     private Hashtable<V, Hashtable<V, Path>> backwardAccessNodeTable;
     private Hashtable<V, Hashtable<V, Path>> accessNodeDistanceTable;
 
-    public ChTnr(Graph<V,Edge> graph){
-        this.graph = graph;
-        order = generateOrder(graph);
+    public ChTnr(AbstractBaseGraph<V,Edge> graph){
+        ch = new CH(graph);
+        ch.init();
+        this.graph = ch.getGraph();
+        this.order = ch.getOrder();
         numOfVertex = graph.vertexSet().size();
         transNodes = order.subList(numOfVertex - (int) Math.sqrt(numOfVertex), numOfVertex);
-
     }
 
-    public ChTnr(Graph<V,Edge> graph,List<V> order){
+    public ChTnr(AbstractBaseGraph<V,Edge> graph,List<V> order){
         this.graph = graph;
         this.order = order;
         numOfVertex = graph.vertexSet().size();
         transNodes = order.subList(numOfVertex - (int) Math.sqrt(numOfVertex), numOfVertex);
     }
 
-    public void init(){
-
+    public List<V> getOrder(){
+        return order;
     }
 
-    public List<V> generateOrder(Graph<V,Edge> graph){
-        List<V> order = new ArrayList<V>();
-        //TODO generate the order
-        return order;
+    public List<V> getTransNodes(){
+        return transNodes;
+    }
+
+    public void init(){
+
+        accessNodeDistanceTable = new Hashtable<V, Hashtable<V, Path>>(transNodes.size());
+        forwardAccessNodeTable = new Hashtable<V, Hashtable<V, Path>>(numOfVertex);
+        backwardAccessNodeTable = new Hashtable<V, Hashtable<V, Path>>(numOfVertex);
+
+        //1.存储中转节点距离
+        System.out.println("saving transNode shortPath table...");
+        for(V v : transNodes){
+            Hashtable<V, Path> hashtable = new Hashtable<V, Path>();
+            for(V w : transNodes){
+                if(w != v){
+                    hashtable.put(w, ch.getPath(v, w));
+                }
+            }
+            accessNodeDistanceTable.put(v, hashtable);
+        }
+        //2.存储每个非中转节点的前向中转节点
+        System.out.println("saving forwardAccessNode shortPath table...");
+        for(V v : graph.vertexSet()){
+            Set<V> forwardAccessNodes = findForwardAccessNode(v);
+            Hashtable<V, Path> hashtable = new Hashtable<V, Path>();
+            for(V w : forwardAccessNodes){
+                hashtable.put(w,ch.getPath(v,w));
+            }
+            forwardAccessNodeTable.put(v, hashtable);
+        }
+        //3.存储每个非中转节点的后向中转节点
+        System.out.println("saving backwardAccessNode shortPath table...");
+        for(V v : graph.vertexSet()){
+            Set<V> backwardAccessNodes = findBackwardAccessNode(v);
+            Hashtable<V, Path> hashtable = new Hashtable<V, Path>();
+            for(V w : backwardAccessNodes){
+                hashtable.put(w,ch.getPath(w,v));
+            }
+            backwardAccessNodeTable.put(v, hashtable);
+        }
     }
 
     /*
@@ -113,19 +154,24 @@ public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
      */
     public Set<V> findForwardAccessNode(V v){
         Set<V> set = new HashSet<V>();
+        Set<V> visitedNodes = new HashSet<V>();
         if(transNodes.contains(v)){
+            set.add(v);
             return set;
         }
         Queue<V> queue = new LinkedList<V>();
         queue.add(v);
         while(!queue.isEmpty()){
             V vertex = queue.poll();
+            visitedNodes.add(vertex);
             for(Edge<V> edge : getUpperEdgeList(vertex)){
                 V w = edge.getTarget();
                 if(transNodes.contains(w)){
                     set.add(w);
                 } else {
-                    queue.add(w);
+                    if(!visitedNodes.contains(w)){
+                        queue.add(w);
+                    }
                 }
             }
         }
@@ -133,23 +179,28 @@ public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
         return set;
     }
     /*
-            BFS寻找前向Access结点
+            BFS寻找后向Access结点
      */
     public Set<V> findBackwardAccessNode(V v){
         Set<V> set = new HashSet<V>();
+        Set<V> visitedNodes = new HashSet<V>();
         if(transNodes.contains(v)){
+            set.add(v);
             return set;
         }
         Queue<V> queue = new LinkedList<V>();
         queue.add(v);
         while(!queue.isEmpty()){
             V vertex = queue.poll();
+            visitedNodes.add(vertex);
             for(Edge<V> edge : getLowerEdgeList(vertex)){
                 V w = edge.getSource();
                 if(transNodes.contains(w)){
                     set.add(w);
                 } else {
-                    queue.add(w);
+                    if(!visitedNodes.contains(w)){
+                        queue.add(w);
+                    }
                 }
             }
         }
@@ -157,12 +208,13 @@ public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
     }
 
     @Override
-    public List<V> getPath(V source, V sink) {
+    public List<V> getPathVertex(V source, V sink) {
         List<V> result = new ArrayList<V>();
         Hashtable<V, Path> sourceTable = forwardAccessNodeTable.get(source);
         Hashtable<V, Path> sinkTable = backwardAccessNodeTable.get(sink);
         if(isIntersect(sourceTable.keySet(),sinkTable.keySet())){
-            //source和sink的最短路径可能不经过中转节点，使用dijkstra算法计算最短路
+            //source和sink的最短路径可能不经过中转节点，使用ch算法计算最短路
+            result = ch.getPathVertex(source, sink);
         } else {
             //使用dist(source,sink) = min(dist(source, T1) + dist(T1, T2) + dist(T2, sink))计算最短路径
             //TODO 使用path来标识路径而不是使用double
