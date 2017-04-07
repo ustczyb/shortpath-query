@@ -10,7 +10,7 @@ import java.util.List;
  * jGraphT中有向边必须继承DefaultWeightedEdge并且重写getWeight方法，否则在使用jGraphT中的计算边权重的算法时边的权重为默认值1
  */
 public class WeightEdge<V> extends DefaultWeightedEdge implements Edge<V> {
-//TODO 优先队列错误问题
+
     private V source;
     private V target;
     private Double length;

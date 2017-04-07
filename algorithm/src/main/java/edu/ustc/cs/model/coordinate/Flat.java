@@ -1,7 +1,7 @@
 package edu.ustc.cs.model.coordinate;
 
 import com.sun.org.apache.regexp.internal.RE;
-import edu.ustc.cs.model.vertex.Node;
+import edu.ustc.cs.model.vertex.Point;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ public class Flat implements Region {
     private double x1,x2;
     private double y1,y2;
 
-    public Flat(List<Node> list){
+    public Flat(List<Point> list){
         y1 = x1 = Double.POSITIVE_INFINITY;
         y2 = x2 = Double.NEGATIVE_INFINITY;
-        for(Node n : list){
+        for(Point n : list){
             if(n.getX() < x1){
                 x1 = n.getX();
             }
@@ -33,7 +33,7 @@ public class Flat implements Region {
     }
 
     @Override
-    public boolean isBelongTo(Node node) {
+    public boolean isBelongTo(Point node) {
         return false;
     }
 

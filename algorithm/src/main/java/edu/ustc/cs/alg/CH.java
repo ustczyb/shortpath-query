@@ -6,8 +6,8 @@ import edu.ustc.cs.model.edge.Edge;
 import edu.ustc.cs.model.edge.ShortCut;
 import edu.ustc.cs.model.edge.WeightEdge;
 import edu.ustc.cs.model.path.ShortestPath;
+import edu.ustc.cs.util.FibonacciMap;
 import edu.ustc.cs.util.GraphUtil;
-import edu.ustc.cs.util.SortMap;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -129,12 +129,12 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
     }
 
     public void init(){
-        SortMap<V, Integer> sortMap = new SortMap<V, Integer>();
+        FibonacciMap<V> sortMap = new FibonacciMap<V>();
         for(V v : graph.vertexSet()){
             sortMap.put(v,calculateEdgeDifference(v));
         }
         while (!sortMap.isEmpty()){
-            V nextOrderedVertex = sortMap.removeFirst();
+            V nextOrderedVertex = sortMap.removeMin();
             contract(nextOrderedVertex);
             for(Edge edge : graph.edgesOf(nextOrderedVertex)){
                 V adjVertex = (V) edge.getAnotherVertex(nextOrderedVertex);

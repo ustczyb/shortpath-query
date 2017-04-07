@@ -1,5 +1,7 @@
 package generator2;
 
+import util.Utility;
+
 import java.awt.*;
 import java.util.Properties;
 
@@ -58,7 +60,7 @@ public class EdgeClasses {
 public EdgeClasses (Properties properties) {
 	// the following code may be modified
 	this.properties = properties;
-	this.num = 8;
+	this.num = 12;
 	// maximum speed
 	maxSpeed = new int[num]; // the values in the array are calculated in the method announceDataspace
 	// maximum capacity
@@ -71,6 +73,11 @@ public EdgeClasses (Properties properties) {
 	capacity[5] = 3;
 	capacity[6] = 2;
 	capacity[7] = 2;
+	capacity[8] = 2; //New edgeclass for edges inside buildings
+	Utility.updateRoomEdgeCapacities(capacity[8]); //Updates all room capacities
+	capacity[9] = 0; //New edgeclass for visualization of building walls
+	capacity[10] = 2; //Edgeclass for dwelling edges
+	capacity[11] = 4; //Edgeclass for stairs
 	// scale for depicting edges
 	minScale = new int[num];
 	minScale[0] = 327680;
@@ -81,6 +88,10 @@ public EdgeClasses (Properties properties) {
 	minScale[5] = 160;
 	minScale[6] = 80;
 	minScale[7] = 80;
+	minScale[8] = 1280; //New edgeclass for edges inside buildings
+	minScale[9] = 1280; //New edgeclass for visualization of building walls
+	minScale[10] = 1280; //New edgeclass for dwelling edges inside buildings
+	minScale[11] = 1280; //Edgeclass for stairs
 	// color for depicting edges
 	color = new Color[num];
 	color[0] = Color.blue;
@@ -91,6 +102,10 @@ public EdgeClasses (Properties properties) {
 	color[5] = Color.green/*lightGray*/;
 	color[6] = Color.lightGray;
 	color[7] = Color.lightGray;
+	color[8] = Color.red; //New edgeclass for edges inside buildings
+	color[9] = Color.black; //New edgeclass for visualization of building walls
+	color[10] = Color.magenta; //New edgeclass for dwelling edges inside buildings
+	color[11] = Color.pink; //Edgeclass for stairs
 }
 /**
  * Announces the time object, the dataspace and the divisor of maximum speed to the object.
@@ -115,7 +130,7 @@ public void announce (Time time, DataSpace ds, int maxSpeedDivisor) {
  * @param c edge class
  * @param edgeUsage usage of the edge
  */
-public int deceleratedSpeed (int c, int edgeUsage) {
+public int deceleratedSpeed (int c, int edgeUsage) { //TODO: Use the room usage for something here!
 	//return maxSpeed[c];   // <- for no speed deceleration
 	if ((c >= 0) && (c < num))
 		if (edgeUsage <= capacity[c])

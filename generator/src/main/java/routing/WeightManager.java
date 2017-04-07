@@ -15,7 +15,7 @@ public interface WeightManager {
 	 * @return  the weight
 	 * @param  distance  the length of the edge
 	 */
-	double computeWeight(double distance);
+	double computeWeight (double distance);
 	
 	/**
 	 * Computation of the weight of an edge for a given speed.
@@ -23,14 +23,14 @@ public interface WeightManager {
 	 * @param  distance  the length of the edge
 	 * @param  speed  the speed on the edge
 	 */
-	double computeWeight(double distance, double speed);
+	double computeWeight (double distance, double speed);
 	
 	/**
 	 * Computation of the weight of an edge.
 	 * @return  the weight
 	 * @param  distance  the edge
 	 */
-	double getWeight(Edge edge);
+	double getWeight (Edge edge);
 	
 	/**
 	 * Computation of the weight of an edge in a given direction.
@@ -38,5 +38,5 @@ public interface WeightManager {
 	 * @param  distance  the edge
 	 * @param  forwards  true: in direction of the edge; false: in the other direction
 	 */
-	double getWeight(Edge edge, boolean forwards);
+	double getWeight (Edge edge, boolean forwards);
 }

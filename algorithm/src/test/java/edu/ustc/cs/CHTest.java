@@ -51,7 +51,10 @@ public class CHTest {
         in.close();
 
         ch = new CH<Integer,Edge>((AbstractBaseGraph<Integer, Edge>) graph);
+        long startTime = System.currentTimeMillis();
         ch.init();
+        long endTime = System.currentTimeMillis();
+        System.out.println("init time : " + (endTime - startTime));
     }
 
     @After
@@ -98,12 +101,12 @@ public class CHTest {
 //            }
 //        }
         long startTime = System.currentTimeMillis();
-        System.out.println(dijkstraShortestPath.getPath(7,93).getVertexList());
+        System.out.println(dijkstraShortestPath.getPath(4,2).getVertexList());
         long endTime = System.currentTimeMillis();
         System.out.println("Dijkstra Run Time : " + (endTime - startTime));
 
         startTime = System.currentTimeMillis();
-        System.out.println(ch.getPathVertex(7, 93));
+        System.out.println(ch.getPathVertex(4, 2));
         endTime = System.currentTimeMillis();
         System.out.println("CH Run Time : " + (endTime - startTime));
 

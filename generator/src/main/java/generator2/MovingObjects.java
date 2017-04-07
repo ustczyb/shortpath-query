@@ -1,6 +1,12 @@
 package generator2;
 
+import java.io.*;
 import java.util.*;
+
+import com.sun.xml.internal.bind.v2.model.core.EnumLeafInfo;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Serializer;
 import routing.*;
 
 /**
@@ -21,7 +27,6 @@ public class MovingObjects {
 	 * the moving objects
 	 */
 	private Vector objs = null;
-
 	/**
 	 * the weight manager
 	 */
@@ -167,6 +172,117 @@ public void move (int time) {
 		}
 	}
 }
+
+	/**
+	 * Writes the output for indoortopology for all moving objects
+	 */
+	/*
+public void writeMovingIndoorOutput(){
+
+	Element trajectories = new Element ("trajectories");
+
+	for (int i=num-1; i>=0; i--) {
+		MovingObject obj = (MovingObject)objs.elementAt(i);
+
+		Element trajectory = new Element("trajectory");
+
+		Element objid = new Element("objid");
+		objid.appendChild(Integer.toString(obj.getId()));
+		trajectory.appendChild(objid);
+
+		for (String s : obj.getRouteList()){
+			Element flag = new Element("flag");
+
+			Element oloc = new Element("oloc");
+			Element otime = new Element("time");
+			Element opos = new Element("pos");
+
+			Element iloc = new Element("iloc");
+			Element itime = new Element("time");
+			Element buildingID = new Element("buildingID");
+			Element floorID = new Element("floorID");
+			Element roomID = new Element("roomID");
+
+			if (s.contains("Building template:")){
+				flag.appendChild("true");
+
+				//oloc.appendChild(otime);
+				//oloc.appendChild(opos);
+
+				iloc.appendChild(itime);
+				//TODO Append actual time here
+				iloc.appendChild(buildingID);
+				iloc.appendChild(floorID);
+				iloc.appendChild(roomID);
+
+				String[] tmp = s.split(":");
+				Scanner sc = new Scanner(tmp[1]);
+				buildingID.appendChild(Integer.toString(sc.nextInt()));
+				sc = new Scanner(tmp[4]);
+				roomID.appendChild(Integer.toString(sc.nextInt()));
+				sc = new Scanner(tmp[5]);
+				floorID.appendChild(Integer.toString(sc.nextInt()));
+				sc = new Scanner(tmp[6]);
+				itime.appendChild(Integer.toString(sc.nextInt()));
+
+				trajectory.appendChild(flag);
+				//trajectory.appendChild(oloc);
+				trajectory.appendChild(iloc);
+			}
+			else {
+				flag.appendChild("false");
+
+				oloc.appendChild(otime);
+				oloc.appendChild(opos);
+
+				//iloc.appendChild(itime);
+				//iloc.appendChild(buildingID);
+				//iloc.appendChild(floorID);
+				//iloc.appendChild(roomID);
+
+				//System.out.println(s);
+
+				String[] tmp = s.split(":");
+				int j = 0;
+				if (s.contains("Floor: ")){ //TODO should not be necessairy
+					j++;
+				}
+
+				Scanner sc = new Scanner(tmp[j+1]);
+				sc.useLocale(Locale.US);
+				otime.appendChild(Integer.toString(sc.nextInt()));
+				sc = new Scanner(tmp[j+2]);
+				sc.useLocale(Locale.US);
+				String tmpPos = Double.toString(sc.nextDouble());
+				sc = new Scanner(tmp[j+3]);
+				sc.useLocale(Locale.US);
+				tmpPos += " " + Double.toString(sc.nextDouble());
+				opos.appendChild(tmpPos);
+
+				trajectory.appendChild(flag);
+				trajectory.appendChild(oloc);
+				//trajectory.appendChild(iloc);
+			}
+		}
+		trajectories.appendChild(trajectory);
+	}
+
+	Document doc = new Document(trajectories);
+
+	try{
+		FileOutputStream fileoutputstream = new FileOutputStream("./output/output.xml");
+
+		Serializer serializer = new Serializer(fileoutputstream, "ISO-8859-1");
+		serializer.setIndent(4);
+		serializer.setMaxLength(128);
+		serializer.write(doc);
+	}
+	catch (IOException ex){
+		System.err.println(ex);
+	}
+}*/
+
+
 /**
  * Removes the moving object at a given index.
  * @param index index of the object
@@ -188,8 +304,13 @@ public void remove (int index) {
 public void removeObjects() {
 	for (int i=0; i<num; i++) {
 		MovingObject obj = (MovingObject)objs.elementAt(i);
-		obj.decreaseUsage (obj.getActPathEdge());
-		obj.getActPathEdge().getEdge().decUsage();
+		obj.decreaseUsage(obj.getActPathEdge());
+		if (obj.getActPathEdge().getEdge().getRoom() != null){ //Decrements room usage if edge is part of a room
+			obj.getActPathEdge().getEdge().getRoom().decUsage();
+		}
+		else {
+			obj.getActPathEdge().getEdge().decUsage();
+		}
 		objs.setElementAt(null,i);
 	}
 	num = 0;

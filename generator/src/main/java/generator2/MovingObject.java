@@ -1,6 +1,14 @@
 package generator2;
 
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Serializer;
 import routing.*;
+import util.Utility;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 /**
  * Class representing a moving object.
@@ -22,7 +30,30 @@ public class MovingObject {
 	 * Description of the object classes.
 	 */
 	private static ObjectClasses objClasses = null;
-
+	/**
+	 * Number of allowed transfers (Number of times a moving object can change destination to a new building)
+	 */
+	private int transfers = Utility.getMaxTranfers();
+	/**
+	 * Variable used to decide how long an object will dwell at a node/edge inside a building
+	 */
+	private int dwellingTime = 0;
+	/**
+	 * Variable used to describe when the dwelling started
+	 */
+	private int startDwellingTime = 0;
+	/**
+	 * Variable for deciding the maximum dwell time
+	 */
+	private int maxDwellTime = Utility.getMaxDwellingTime();
+	/**
+	 * List of destinations that the moving object has reached
+	 */
+	private Map<String,String> routeList = new LinkedHashMap<>();
+	/**
+	 * Object generator class, so each moving object has a connection to the object generator
+	 */
+	private ObjectGenerator objGen = null;
 	/**
 	 * The container of the object.
 	 */
@@ -105,7 +136,7 @@ public class MovingObject {
  * @param  dest  destination node
  * @param  time  starting time
  */
-public MovingObject (int id, int objClass, Node start, Node dest, int time) {
+public MovingObject (int id, int objClass, Node start, Node dest, int time, ObjectGenerator objGen) {
 	this.id = id;
 	this.objClass = objClass;
 	this.start = start;
@@ -116,9 +147,20 @@ public MovingObject (int id, int objClass, Node start, Node dest, int time) {
 	this.lastNode = start;
 	lastX = start.getX();
 	lastY = start.getY();
+	this.objGen = objGen;//Added the object generator so each moving object can call functions from
+	//System.out.println("Dest:" + dest.getName() + " Transfers left: " + transfers);
 }
 
-/**
+	public MovingObject(int id, int objClass) {
+		this.id = id;
+		this.objClass = objClass;
+	}
+
+	public void setRouteList(Map<String, String> routeList) {
+		this.routeList = routeList;
+	}
+
+	/**
  * Adds the moving object to the container.
  * @param container container
  */
@@ -151,13 +193,14 @@ public static double computeDistance (double x1, double y1, double x2, double y2
  * @param newTime new time
  * @param reporter reporter
  */
-private boolean computeNextPoint (int newTime, Reporter reporter) {
+private boolean computeNextPoint (int newTime, Reporter reporter) { //TODO: This is probably where the dwelling time should be used!
 	if (route == null)
 		return true;
 	// decrease usage of the edge traversed during the last time period
 	Edge actEdge = route.getEdge();
 	decreaseUsage (route);
 	lastRoute = route;
+
 	// if event then re-route
 	if (container.getReRoute().computeNewRouteByEvent (lastTime,actTime)) {
 		reroute(actEdge);
@@ -173,63 +216,156 @@ private boolean computeNextPoint (int newTime, Reporter reporter) {
 	double actWeight = actEdge.getWeight();
 	double speed = actDist/actWeight;
 	double maxDistOnEdge = remainingTime*speed;
+
 	while (true) {
-		// case 1: next node is not reached
-		if (relDist+maxDistOnEdge < actDist) {
-			relDist += maxDistOnEdge;
-			computePoint(actEdge,lastNode,relDist);
-			util.Timer.stop(1);
-			doneDist += computeDistance(llx,lly,lastX,lastY);
+		if (!dest.getName().contains("Building")){
+			setStart(lastNode);
+			setDestination(objGen.computeDestinationNode(actTime, lastNode, objGen.computeLengthOfRoute(actTime, objClass), objClass)); //Computes new destination node inside a building
+		}
+		if (newTime - startDwellingTime > dwellingTime) {
+			// case 1: next node is not reached
+			if (relDist + maxDistOnEdge < actDist) {
+				relDist += maxDistOnEdge;
+				computePoint(actEdge, lastNode, relDist);
+				util.Timer.stop(1);
+				doneDist += computeDistance(llx, lly, lastX, lastY);
+				int oldRepNum = repNum;
+				Node nextNode = route.getDestinationNode();
+
+				//Uses both lastnode, actEdge and lastRoute to get information about which edges and nodes the object has passed
+				/*if (!routeList.contains(lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY)
+						&& !routeList.contains(lastNode.getName() + " Time: " + newTime)) {
+					if (!lastNode.getName().contains("Building template:")){
+						routeList.add(lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY);
+					}
+					else {
+						routeList.add(lastNode.getName() + " Time: " + newTime  + " Last X: " + lastX + " Last Y:" + lastY);
+					}
+				}
+*/
+				if (actEdge.getEdgeClass() == 8 || actEdge.getEdgeClass() == 9 || actEdge.getEdgeClass() == 10 || actEdge.getEdgeClass() == 11) {
+					if (actEdge.getNode1().getName().contains("Building template:") && actEdge.getNode2().getName().contains("Building template:") && lastNode.getName().contains("Building template:")){
+						repNum = reporter.reportInsideMovingObject(newTime, id, repNum, objClass, lastX, lastY, speed, doneDist, nextNode.getX(), nextNode.getY(), objClasses.getReportProbability(objClass), actEdge.getFloor());
+						routeList.put(Integer.toString(newTime), lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY);
+						//System.out.println("Time: " + newTime + " x: " + lastX + " y: " + lastY + "Last node inside: " + lastNode.getName());
+						//Utility.addPosition(new Position(lastX, lastY, objClass, actEdge.getFloor()));
+					}
+				}
+				else {
+					repNum = reporter.reportMovingObject(newTime, id, repNum, objClass, lastX, lastY, speed, doneDist, nextNode.getX(), nextNode.getY(), objClasses.getReportProbability(objClass));
+					routeList.put(Integer.toString(newTime), lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY);
+					//System.out.println("Time: " + newTime + " x: " + lastX + " y: " + lastY + "Last node outside: " + lastNode.getName());
+					//Utility.addPosition(new Position(lastX, lastY, objClass));
+				}
+				if (repNum != oldRepNum) {
+					doneDist = 0;
+				}
+				util.Timer.start(1);
+				return false;
+			}
+			// case 2: next node is reached
+			else {
+				remainingTime -= (actDist - relDist) * actWeight / actDist;
+				relDist = 0;
+				lastNode = actEdge.getOppositeNode(lastNode);
+				doneDist += computeDistance(llx, lly, lastNode.getX(), lastNode.getY());
+				llx = lastNode.getX();
+				lly = lastNode.getY();
+				// case 2a next node is destination
+				if (lastNode == dest) {
+					if (transfers == 0) {
+						decreaseUsage(null);
+						arrivalTime = newTime - remainingTime;
+						return true;
+					}
+
+					startDwellingTime = newTime;
+					dwellingTime = (int) Math.round(Math.random() * maxDwellTime);
+
+					//Moving objects will go to another destination after reaching their first destination
+					setStart(lastNode);
+					//System.out.println("Prev Dest:" + dest.getName() + " Transfers left: " + transfers);
+					setDestination(objGen.computeDestinationNode(actTime, lastNode, objGen.computeLengthOfRoute(actTime, objClass), objClass)); //Computes new destination node inside a building
+					computeRoute();
+					transfers--;
+					//System.out.println("Dest:" + dest.getName() + " Transfers left: " + transfers);
+					//System.out.println("Transfers: " + transfers + "Start: " + getStartingNode().getName() + " Dest: " + getDestinationNode().getName()); //TODO Remove this
+				}
+				// else: fetch next edge
+				route = route.getNext();
+
+				if (route == null) {
+					//System.err.println("computeNextPoint: route == null! (2)"+id+" at "+newTime);
+					/*dest = lastNode; //TODO Old version
+					decreaseUsage(null);
+					arrivalTime = newTime - remainingTime;
+					return true;*/
+
+					if (transfers == 0) {
+						decreaseUsage(null);
+						arrivalTime = newTime - remainingTime;
+						return true;
+					}
+
+					//startDwellingTime = newTime;
+					//dwellingTime = (int) Math.round(Math.random() * maxDwellTime);
+
+					//Moving objects will go to another destination after reaching their first destination
+					setStart(lastNode);
+					//System.out.println("Prev Dest:" + dest.getName() + " Transfers left: " + transfers);
+					setDestination(objGen.computeDestinationNode(actTime, lastNode, objGen.computeLengthOfRoute(actTime, objClass), objClass)); //Computes new destination node inside a building
+					computeRoute();
+					transfers--;
+					//System.out.println("Dest:" + dest.getName() + " Transfers left: " + transfers);
+					//System.out.println("Transfers: " + transfers + "Start: " + getStartingNode().getName() + " Dest: " + getDestinationNode().getName()); //TODO Remove this
+				}
+				actEdge = route.getEdge();
+				if (actEdge.getRoom() != null) { //If the edge belongs to a Room then update the usage of the room instead of the edge
+					actEdge.getRoom().incUsage();
+				} else {
+					actEdge.incUsage();
+				}
+
+				// update edge characteristics
+				actDist = actEdge.getLength();
+				if (actDist == 0)    // in the case of identical nodes
+					actDist = 1;
+				actWeight = actEdge.getWeight();
+				speed = actDist / actWeight;
+				maxDistOnEdge = remainingTime * speed;
+				// report
+				util.Timer.stop(1);
+				reporter.reportEdge(newTime - remainingTime, id, ++edgeNum, objClass, actEdge.getId(), actEdge.getEdgeClass(), route.getStartingNode().getX(), route.getStartingNode().getY(), speed, route.getDestinationNode().getX(), route.getDestinationNode().getY(), objClasses.getReportProbability(objClass));
+				util.Timer.start(1);
+				// if significant speed change then re-route
+				if (container.getReRoute().computeNewRouteByComparison(lastTime, actTime, (int) (0x7fffffff / route.getOrigWeight()), (int) (0x7fffffff / actWeight))) {
+					reroute(actEdge);
+				}
+			}
+		}
+		else {
+			doneDist += computeDistance(llx, lly, lastX, lastY);
 			int oldRepNum = repNum;
 			Node nextNode = route.getDestinationNode();
- 			repNum = reporter.reportMovingObject(newTime,id,repNum,objClass,lastX,lastY,speed,doneDist,nextNode.getX(),nextNode.getY(),objClasses.getReportProbability(objClass));
- 			if (repNum != oldRepNum)
- 				doneDist = 0;
-			util.Timer.start(1);
+			if (actEdge.getEdgeClass() == 8 || actEdge.getEdgeClass() == 9 || actEdge.getEdgeClass() == 10 || actEdge.getEdgeClass() == 11) {
+				if (actEdge.getNode1().getName().contains("Building template:") && actEdge.getNode2().getName().contains("Building template:") && lastNode.getName().contains("Building template:")){
+					repNum = reporter.reportInsideMovingObject(newTime, id, repNum, objClass, lastX, lastY, speed, doneDist, nextNode.getX(), nextNode.getY(), objClasses.getReportProbability(objClass), actEdge.getFloor());
+					routeList.put(Integer.toString(newTime), lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY);
+					//System.out.println("Time: " + newTime + " x: " + lastX + " y: " + lastY + "Last node inside: " + lastNode.getName());
+				}
+			}
+			else {
+				repNum = reporter.reportMovingObject(newTime, id, repNum, objClass, lastX, lastY, speed, doneDist, nextNode.getX(), nextNode.getY(), objClasses.getReportProbability(objClass));
+				routeList.put(Integer.toString(newTime), lastNode.getName() + " Time: " + newTime + " Last X: " + lastX + " Last Y:" + lastY);
+				//System.out.println("Time: " + newTime + " x: " + lastX + " y: " + lastY + "Last node outside: " + lastNode.getName());
+			}
+			if (repNum != oldRepNum) {
+				doneDist = 0;
+			}
 			return false;
 		}
-		// case 2: next node is reached
-		else {
-			remainingTime -= (actDist-relDist)*actWeight/actDist;
-			relDist = 0;
-			lastNode = actEdge.getOppositeNode(lastNode);
-			doneDist += computeDistance(llx,lly,lastNode.getX(),lastNode.getY());
-			llx = lastNode.getX();
-			lly = lastNode.getY();
-			// case 2a next node is destination
-			if (lastNode == dest) {
-				decreaseUsage (null);
-				arrivalTime = newTime-remainingTime;
-				return true;
-			}
-			// else: fetch next edge
-			route = route.getNext();
-			if (route == null) {
-				//System.err.println("computeNextPoint: route == null! (2)"+id+" at "+newTime);
-				dest = lastNode;
-				decreaseUsage (null);
-				arrivalTime = newTime-remainingTime;
-				return true;
-			}
-			actEdge = route.getEdge();
-			actEdge.incUsage();
-			// update edge characteristics
-			actDist = actEdge.getLength();
-			if (actDist == 0)	// in the case of identical nodes
-				actDist = 1;
-			actWeight = actEdge.getWeight();
-			speed = actDist/actWeight;
-			maxDistOnEdge = remainingTime*speed;
-			// report
-			util.Timer.stop(1);
-			reporter.reportEdge(newTime-remainingTime,id,++edgeNum,objClass,actEdge.getId(),actEdge.getEdgeClass(),route.getStartingNode().getX(),route.getStartingNode().getY(),speed,route.getDestinationNode().getX(),route.getDestinationNode().getY(),objClasses.getReportProbability(objClass));
-			util.Timer.start(1);
-			// if significant speed change then re-route
-			if (container.getReRoute().computeNewRouteByComparison (lastTime,actTime,(int)(0x7fffffff/route.getOrigWeight()),(int)(0x7fffffff/actWeight))) {
-				reroute(actEdge);
-			}
-		}
 	}
+
 }
 
 /**
@@ -272,16 +408,24 @@ public boolean computeRoute() {
 		route = container.getNetwork().computeFastWay2 (start,dest);
 		util.Timer.stop(2);
 		if (route != null) {
-			if ((route.getNext() == null) || (route.getNext().getNext() == null))
+			if ((route.getNext() == null) || (route.getNext().getNext() == null)) {
 				return false;
-			route.getEdge().incUsage();
+			}
+			if (route.getEdge().getRoom() != null){ //Checks if the edge is inside a room, updates the usage of all edges in the room if this is the case
+				route.getEdge().getRoom().incUsage();
+			}
+			else {
+				route.getEdge().incUsage();
+			}
 			if (container != null) {
 				container.incTraversedNodesBy(route.computeNumber());
 				container.incTraversedDegreeBy(route.computeDegree());
 			}
 		}
-		else
+		else{
 			return false;
+		}
+
 	}
 	return true;
 }
@@ -295,7 +439,12 @@ protected void decreaseUsage (PathEdge actPathEdge) {
 	if (path != null) {
 		Edge travEdge = path.getEdge();
 		while ((path != null) && (path != actPathEdge)) {
-			travEdge.decUsage();
+			if (travEdge.getRoom() != null) { //Decrement room usage if the edge is part of a room
+				travEdge.getRoom().decUsage();
+			}
+			else {
+				travEdge.decUsage();
+			}
 			path = path.getNext();
 			if (path != null)
 				travEdge = path.getEdge();
@@ -344,6 +493,14 @@ public int getRepNum() {
 }
 
 /**
+ * Returns the list of visited building templates
+ * @return
+ */
+public Map<String,String> getRouteList() {
+	return routeList;
+}
+
+	/**
  * Return the starting node.
  * @return start
  */
@@ -377,7 +534,7 @@ public boolean move (int newTime, Reporter reporter) {
 public void reportEnd (Reporter reporter) {
 	util.Timer.stop(1);
 	if (reporter != null) {
- 		reporter.reportDisappearingObject (arrivalTime,id,repNum,objClass,dest.getX(),dest.getY(),doneDist,objClasses.getReportProbability(objClass));
+ 		reporter.reportDisappearingObject(arrivalTime, id, repNum, objClass, dest.getX(), dest.getY(), doneDist, objClasses.getReportProbability(objClass));
 	}
 	util.Timer.start(1);
 }
@@ -395,7 +552,7 @@ public void reportNewObject (Reporter reporter) {
 		double speed = actDist/actWeight;
 		Node nextNode = route.getDestinationNode();
 		repNum = reporter.reportNewMovingObject (startTime,id,objClass,start.getX(),start.getY(),speed,nextNode.getX(),nextNode.getY(),objClasses.getReportProbability(objClass));
-		reporter.reportEdge(startTime,id,++edgeNum,objClass,currEdge.getId(),currEdge.getEdgeClass(),route.getStartingNode().getX(),route.getStartingNode().getY(),speed,route.getDestinationNode().getX(),route.getDestinationNode().getY(),objClasses.getReportProbability(objClass));
+		reporter.reportEdge(startTime, id, ++edgeNum, objClass, currEdge.getId(), currEdge.getEdgeClass(), route.getStartingNode().getX(), route.getStartingNode().getY(), speed, route.getDestinationNode().getX(), route.getDestinationNode().getY(), objClasses.getReportProbability(objClass));
 	}
 	util.Timer.start(1);
 }

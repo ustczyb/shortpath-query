@@ -14,5 +14,5 @@ public interface EntryReadable {
  * @return eingelesenes Objekt bzw. null
  * @param r Entry-Input
  */
-public EntryReadable read(EntryInput r);
+public EntryReadable read (EntryInput r);
 }

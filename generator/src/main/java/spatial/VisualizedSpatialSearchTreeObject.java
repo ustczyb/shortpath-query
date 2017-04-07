@@ -15,12 +15,12 @@ public interface VisualizedSpatialSearchTreeObject extends LayerSpatialSearchTre
 	 * @param y y-coordinate of the point
 	 * @param scale scale
 	 */
-	boolean interacts(int x, int y, int scale);
+	boolean interacts (int x, int y, int scale);
 	/**
 	 * Tests whether the object is visible at a given scale or not.
 	 * @return visible?
 	 * @param scale scale
 	 */
-	boolean isVisible(int scale);
+	boolean isVisible (int scale);
 
 }

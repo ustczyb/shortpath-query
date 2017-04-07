@@ -21,53 +21,53 @@ public interface SpatialSearchTreeObject extends SpatialSearchTreeEntry {
 	 * @return  the distance
 	 * @param  point  coordinates of the point
 	 */
-	double computeDistanceTo(int[] point);
+	double computeDistanceTo (int[] point);
 	/**
 	 * Tests whether the object contains a given rectangle or not.
 	 * @return  contains?
 	 * @param  rect  the rectangle
 	 */
-	boolean contains(MBR rect);
+	boolean contains (MBR rect);
 	/**
 	 * Draws the object.
 	 * @param  g      graphic context
 	 * @param  scale  the current scale
 	 */
-	void draw(Graphics g, int scale);
+	void draw (Graphics g, int scale);
 	/**
 	 * Returns the identifier of the object.
 	 * @return  the ID
 	 */
-	long getId();
+	long getId ();
 	/**
 	 * Tests whether the object intersects another object.
 	 * @return  intersects?
 	 * @param  obj  the object
 	 */
-	boolean intersects(Object obj);
+	boolean intersects (Object obj);
 	/**
 	 * Tests whether the object intersects a given rectangle.
 	 * @return  intersects?
 	 * @param  r  the rectangle
 	 */
-	boolean intersects(MBR r);
+	boolean intersects (MBR r);
 	/**
 	 * Tests whether the object is contained by a given rectangle or not.
 	 * @return  is contained?
 	 * @param  rect  the rectangle
 	 */
-	boolean isContainedBy(MBR rect);
+	boolean isContainedBy (MBR rect);
 	/**
 	 * Tests whether the object is contained by a given entry or not.
 	 * @return  is contained?
 	 * @param  entry  the entry
 	 */
-	boolean isContainedBy(SpatialSearchTreeEntry entry);
+	boolean isContainedBy (SpatialSearchTreeEntry entry);
 	/**
 	 * Tests whether the object is of the same type as the given object or not.
 	 * @return  is of same type?
 	 * @param  obj  the other object
 	 */
-	boolean isOfSameType(SpatialSearchTreeObject obj);
+	boolean isOfSameType (SpatialSearchTreeObject obj);
 	
 }

@@ -1,15 +1,23 @@
 package generator2;
 
 import java.awt.*;
+import java.awt.Font;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 import drawables.*;
+import javafx.util.Pair;
+import nu.xom.*;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import routing.*;
+import routing.Node;
+import routing.Nodes;
 import showmap.*;
 import spatial.*;
+import src.MainsCombined;
 import util.*;
 
 /**
@@ -32,6 +40,11 @@ import util.*;
  * @author FH Oldenburg
  */
 public abstract class DataGenerator extends ShowNetworkMap implements java.awt.event.AdjustmentListener {
+
+	/**
+	 * Stores all moving objects
+	 */
+	protected ArrayList<MovingObject> listOfObjects = new ArrayList<>();
 
 	/**
 	 * Properties of the data generator
@@ -140,6 +153,18 @@ public abstract class DataGenerator extends ShowNetworkMap implements java.awt.e
 	 */
 	private Button addTimeButton = null;
 	/**
+	 * Apply changes to maximum number of floors
+	 */
+	private Button applyMaxNumOfFloors = null;
+	/**
+	 * Reads the current moving object output file and draws objects
+	 */
+	private Button readMovingObjects = null;
+	/**
+	 * True if no previous buildings exsist
+	 */
+	private Boolean buildingsExsist = false;
+	/**
 	 * Scrollbar
 	 */
 	private Scrollbar timeScrollbar = null;
@@ -184,6 +209,48 @@ public abstract class DataGenerator extends ShowNetworkMap implements java.awt.e
 	 */
 	private TextField extobjBeginText = null;
 	/**
+	 * Textfield for specifying the maximum number of floors
+	 */
+	private TextField maxNumOfFloorsText = null;
+	/**
+	 * Textfield for specifying the maximum dwellingtime
+	 */
+	private TextField maxDwellingTimeText = null;
+	/**
+	 * Textfield for number of transfers allowed for the moving objects
+	 */
+	private TextField maxNumOfTransfersText = null;
+	/**
+	 * Checkbox for showing buildings
+	 */
+	private Checkbox showBuildingsCheckBox = null;
+	/**
+	 * Checkbox for indoor edges
+	 */
+	private Checkbox indoorEdgesCheckBox = null;
+	/**
+	 * Show dwelling edges
+	 */
+	private Checkbox showDwellingEdges = null;
+	/**
+	 * Label for max number of floors
+	 */
+	private Label maxNumberOfFloorsLabel = null;
+	/**
+	 * Label for max dwellingtime
+	 */
+	private Label maxDwellingTimeLabel = null;
+
+	private Label pleaseWaitLabel = null;
+	/**
+	 * Label for max number of transfers
+	 */
+	private Label maxNumOfTransfersLabel = null;
+	/**
+	 * Scrollbar for showing floors
+	 */
+	private Scrollbar floorScrollBar = null;
+	/**
 	 * Delete button
 	 */
 	private Button deleteButton = null;
@@ -221,13 +288,14 @@ public static void main (String nameOfApplet) {
 		aDataGenerator = (DataGenerator)java.beans.Beans.instantiate(iiClsLoader,nameOfApplet);
 		frame.add("Center", aDataGenerator);
 		Dimension size = aDataGenerator.getSize();
-		size.setSize (size.width+10,size.height+50);
+		size.setSize(size.width + 278, size.height + 50);
 		frame.setSize(size);
 		// add a windowListener for the windowClosedEvent 
-		frame.addWindowListener (new WindowAdapter() {
-			public void windowClosing (WindowEvent e) {
+		frame.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
 				System.exit(0);
-			};
+			}
+
 		});
 		frame.setVisible(true);
 	} catch (Throwable exception) {
@@ -254,9 +322,224 @@ public void actionPerformed (ActionEvent e) {
 	}
 	if (e.getSource() == getDeleteButton()) {
 		deleteObjects();
+		drawableObjects.removeAllObjectsOfLayer(Drawable.OBJECTLAYER);
 		deleteButton.setEnabled(false);
 		getAddTimeButton().setEnabled(false);
 		getComputeButton().setEnabled(true);
+		getReadMovingObjects().setEnabled(true);
+	}
+
+	if (e.getSource() == getReadMovingObjects()){
+
+		Utility.assignSIDs();
+
+		int snodeNumber = 5;
+		Node sNode = null;
+
+		for (Node n : Utility.getAllNodes()){
+			if (n.getsId() == snodeNumber){
+				sNode = n;
+				break;
+			}
+		}
+
+		bfs(sNode,1);
+		System.out.println("Done with bfs 1");
+		System.out.println("sNode coords: " + sNode.x + "," + sNode.y);
+		int i = 0;
+
+		for (Node n : Utility.getAllNodes()){
+			if (n.getMark() == 1){
+				DrawableSymbol pathNode = new DrawableSymbol(n.x,n.y,"bfs1" + i);
+				i++;
+				n.setLayer(Drawable.OBJECTLAYER);
+				n.getPresentation().setVisibility(true);
+				n.getPresentation().setSize(5);
+				n.getPresentation().setColor(Color.black);
+				n.getPresentation().setFillColor(Color.blue);
+				drawableObjects.addDrawable(pathNode);
+			}
+		}
+
+		System.out.println("Nodes in BFS:" + i);
+
+		ArrayList<Node> nodesToRemove = new ArrayList<>();
+		ArrayList<Edge> edgesToRemove = new ArrayList<>();
+
+		ArrayList<Node> allNodes = Utility.getAllNodes();
+		ArrayList<Edge> allEdges = Utility.getAllEdges();
+
+		for (Node n : Utility.getAllNodes()){
+			if (n.getFirstEdge() != null){
+				if (n.getMark() != 1 && !n.getFirstEdge().getName().contains("walls")){
+					nodesToRemove.add(n);
+
+					for (Edge edge : n.getConnectedEdges()){
+						edgesToRemove.add(edge);
+					}
+
+					DrawableSymbol pathNode = new DrawableSymbol(n.x,n.y,"bfs2" + i);
+					i++;
+					n.setLayer(Drawable.OBJECTLAYER);
+					n.getPresentation().setVisibility(true);
+					n.getPresentation().setSize(5);
+					n.getPresentation().setColor(Color.black);
+					n.getPresentation().setFillColor(Color.red);
+					drawableObjects.addDrawable(pathNode);
+				}
+			}
+		}
+
+		for (Node n : nodesToRemove){
+			allNodes.remove(n);
+		}
+		for (Edge edge : edgesToRemove){
+			allEdges.remove(edge);
+		}
+
+		Utility.setAllNodes(allNodes);
+		Utility.setAllEdges(allEdges);
+
+		repaint();
+
+		Utility.writeGraphToOtherFormat();
+
+		ArrayList<Pair<Integer,Integer>>QuerySet = new ArrayList<>();
+
+		int setsFound = 0;
+		int setsBothInBuildings = 0;
+		int setOneInBuilding = 0;
+		int numberOfSets = 100;
+
+		Random r = new Random();
+		int sNodeSId = r.nextInt(Utility.maxSId);
+		int tNodesId = r.nextInt(Utility.maxSId);
+
+		Pair<Integer,Integer>stPair = new Pair<>(sNodeSId,tNodesId);
+		Pair<Integer,Integer>tsPair = new Pair<>(tNodesId,sNodeSId);
+
+		while (setsFound < numberOfSets){ //Used for generating query sets
+
+			while (QuerySet.contains(stPair) || QuerySet.contains(tsPair)){
+
+				sNodeSId = r.nextInt(Utility.maxSId);
+				tNodesId = r.nextInt(Utility.maxSId);
+				while (sNodeSId == tNodesId) {
+					tNodesId = r.nextInt(Utility.maxSId);
+				}
+				stPair = new Pair<>(sNodeSId,tNodesId);
+				tsPair = new Pair<>(tNodesId,sNodeSId);
+			}
+
+			QuerySet.add(stPair);
+			if (Utility.nodesWithSIds.get(sNodeSId).getName().contains("Building") && Utility.nodesWithSIds.get(tNodesId).getName().contains("Building")){
+				setsBothInBuildings++;
+			}
+			else if(Utility.nodesWithSIds.get(sNodeSId).getName().contains("Building") || Utility.nodesWithSIds.get(tNodesId).getName().contains("Building")){
+				setOneInBuilding++;
+			}
+
+			setsFound++;
+		}
+
+		for (Pair p : QuerySet){
+			System.out.print("stPair(" + p.getKey() + "," + p.getValue() + "),");
+		}
+
+		System.out.println("\nSets both in buildings = " + setsBothInBuildings + " Sets one in building = " + setOneInBuilding);
+
+//		QuerySet.add(new Pair<>(39234,284356));
+//
+//		//For generating Dijkstra's algorithm alternatives without buildings
+		ArrayList<Pair<Node,Node>> QuerySetNodes = new ArrayList<>();
+
+		System.out.println("No buildings QuerySet:");
+
+		for (Pair<Integer,Integer> p : QuerySet){
+			if ((Utility.nodesWithSIds.get(p.getKey()).getName().contains("Floor") || Utility.nodesWithSIds.get(p.getKey()).getName().contains("Building")) && (Utility.nodesWithSIds.get(p.getValue()).getName().contains("Floor") || Utility.nodesWithSIds.get(p.getValue()).getName().contains("Building"))){
+				QuerySetNodes.add(new Pair<>(Utility.findNearestNodeOnRoad(Utility.nodesWithSIds.get(p.getKey())),Utility.findNearestNodeOnRoad(Utility.nodesWithSIds.get(p.getValue()))));
+			}
+			else if ((Utility.nodesWithSIds.get(p.getKey()).getName().contains("Floor") || Utility.nodesWithSIds.get(p.getKey()).getName().contains("Building")) && (!Utility.nodesWithSIds.get(p.getValue()).getName().contains("Floor") && !Utility.nodesWithSIds.get(p.getValue()).getName().contains("Building"))){
+				QuerySetNodes.add(new Pair<>(Utility.findNearestNodeOnRoad(Utility.nodesWithSIds.get(p.getKey())),Utility.nodesWithSIds.get(p.getValue())));
+			}
+			else if ((!Utility.nodesWithSIds.get(p.getKey()).getName().contains("Floor") && !Utility.nodesWithSIds.get(p.getKey()).getName().contains("Building")) && (Utility.nodesWithSIds.get(p.getValue()).getName().contains("Floor") || Utility.nodesWithSIds.get(p.getValue()).getName().contains("Building"))){
+				QuerySetNodes.add(new Pair<>(Utility.nodesWithSIds.get(p.getKey()),Utility.findNearestNodeOnRoad(Utility.nodesWithSIds.get(p.getValue()))));
+			}
+			else {
+				QuerySetNodes.add(new Pair<>(Utility.nodesWithSIds.get(p.getKey()),Utility.nodesWithSIds.get(p.getValue())));
+			}
+		}
+
+		Utility.writeGraphToOtherFormatNoBuildings();
+
+		for (Pair<Node,Node> p : QuerySetNodes){
+			System.out.print("stPair(" + p.getKey().getsId() + "," + p.getValue().getsId() + "),");
+		}
+
+		System.out.println("Number of nodes: " + QuerySetNodes.size());
+
+//		readMovingObjectsOutput();
+//		Node actNode = null;
+//		Nodes n = net.getNodes();
+//		try{
+//			DataInput nodeIn = new DataInputStream(new FileInputStream("./dataset/Oldenburg-d.co"));
+//			int counter = 0;
+//			while((actNode = n.readNewData(nodeIn)) != null && counter < 10){
+//				//System.out.println(actNode.getID() + " " + actNode.x + " " + actNode.y + " " + actNode.getName());
+//				counter++;
+//			}
+//		}
+//		catch (Exception ex){
+//			ex.printStackTrace();
+//		}
+//		Edge actEdge = null;
+//		try{
+//			DataInput edgeIn = new DataInputStream(new FileInputStream("./dataset/Oldenburg-d.gr"));
+//			int counter = 0;
+//			Edges edges = net.getEdges();
+//			Nodes nodes = net.getNodes();
+//			while((actEdge = edges.readNewData(edgeIn, nodes)) != null && counter < 10){
+//				System.out.println(actEdge.getID() + " " + actEdge.getNode1().getID() + " " + actEdge.getNode2().getID() + " " + actEdge.getLength() +
+//						" " + actEdge.getEdgeClass() + " " + actEdge.getName());
+//				counter++;
+//			}
+//		}
+//		catch (Exception ex){
+//			ex.printStackTrace();
+//		}
+	}
+
+	if (e.getSource() == getApplyMaxNumOfFloors()){
+		getPleaseWaitLabel().setVisible(true);
+		Utility.setMaxNumOfFloors(Integer.parseInt(getMaxNumOfFloorsTextField().getText()));
+		drawableObjects.removeAll();
+
+		getMaxNumOfFloorsTextField().setEnabled(false);
+		getApplyMaxNumOfFloors().setEnabled(false);
+		Utility.setAllNodes(new ArrayList<>());
+		Utility.setAllEdges(new ArrayList<>());
+		Utility.setAllFaces(new ArrayList<>());
+		net.setEdges(new Edges());
+		net.setNodes(new Nodes(net.getEdges()));
+
+		MainsCombined.generateNewIndoorTopology(true);
+		/*try {
+			DataInputStream nodeIn = new DataInputStream(new FileInputStream("./dataset/network.node"));
+			DataInputStream edgeIn = new DataInputStream(new FileInputStream("./dataset/network.edge"));
+			getNetwork().createByNetworkFiles(nodeIn, edgeIn, drawableObjects); //TODO Write in documentation that they cannot change the name of the file that is being read
+		}
+		catch (FileNotFoundException f){
+			System.out.println("Input data not found, try restarting the program");
+		}*/
+
+		getFloorScrollBar().setValue(0);
+		getFloorScrollBar().setMaximum(Integer.parseInt(getMaxNumOfFloorsTextField().getText()));
+		getPleaseWaitLabel().setVisible(false);
+
+		frame.hide(); //Todo remove all edges, nodes and faces before starting new main
+		main ("generator2.DefaultDataGenerator");
+
+		//repaint();
 	}
 }
 
@@ -291,6 +574,20 @@ protected void addComponentsToApplet () {
 	add(getExtObjPerTimeTextField(), getExtObjPerTimeTextField().getName());
 	add(getExtObjBeginTextField(), getExtObjBeginTextField().getName());
 	add(getDeleteButton(), getDeleteButton().getName());
+	//NEW UI ELEMENTS
+	add(getMaxDwellingTimeText(), getMaxDwellingTimeText().getName());
+	add(getMaxNumOfFloorsTextField(), getMaxNumOfFloorsTextField().getName());
+	add(getMaxNumOfTransfersText(), getMaxNumOfTransfersText().getName());
+	add(getShowBuildingsCheckBox(), getShowBuildingsCheckBox().getName());
+	add(getShowDwellingEdges(), getShowDwellingEdges().getName());
+	add(getIndoorEdgesCheckBox(), getIndoorEdgesCheckBox().getName());
+	add(getMaxNumberOfFloorsLabel(), getMaxNumberOfFloorsLabel().getName());
+	add(getMaxDwellingTimeLabel(), getMaxDwellingTimeLabel().getName());
+	add(getMaxNumOfTransfersLabel(),getMaxNumOfTransfersLabel().getName());
+	add(getFloorScrollBar(), getFloorScrollBar().getName());
+	add(getApplyMaxNumOfFloors(), getApplyMaxNumOfFloors().getName());
+	add(getPleaseWaitLabel(), getPleaseWaitLabel().getName());
+	add(getReadMovingObjects(), getReadMovingObjects().getName());
 }
 
 /**
@@ -302,6 +599,12 @@ protected void addComponentsToListeners () {
 	getAddTimeButton().addActionListener(this);
 	getTimeScrollbar().addAdjustmentListener(this);
 	getDeleteButton().addActionListener(this);
+	getApplyMaxNumOfFloors().addActionListener(this);
+	getShowBuildingsCheckBox().addItemListener(this);
+	getShowDwellingEdges().addItemListener(this);
+	getIndoorEdgesCheckBox().addItemListener(this);
+	getFloorScrollBar().addAdjustmentListener(this);
+	getReadMovingObjects().addActionListener(this);
 }
 
 /**
@@ -316,18 +619,113 @@ public void adjustmentValueChanged (java.awt.event.AdjustmentEvent e) {
 			repaint();
 		}
 	}
+	if (e.getSource() == getFloorScrollBar()){
+		if (drawableObjects != null) {
+			drawableObjects.removeAllObjectsOfLayer(Drawable.BUILDINGLAYER);
+			drawableObjects.removeAllObjectsOfLayer(Drawable.DWELLINGLAYER);
+			drawableObjects.removeAllObjectsOfLayer(Drawable.INSIDELAYER);
+			drawableObjects.removeAllObjectsOfLayer(Drawable.OBJECTLAYER);
+
+			Utility.setActFloorVisual(getFloorScrollBar().getMinimum()
+					+getFloorScrollBar().getMaximum()-getFloorScrollBar().getValue()-1);
+
+			for (Edge edge : Utility.getAllEdges()){
+				drawEdgeIfRightFloor(edge);
+			}
+
+			if (!getComputeButton().isEnabled()) {
+				setTime(actTime);
+			}
+
+			repaint();
+		}
+	}
 }
+	/**
+	 * Method that checks if an edge is supposed to be drawn or not
+	 */
+	private void drawEdgeIfRightFloor(Edge edge){
+		if (edge.getFloor() == Utility.getActFloorVisual()){
+			if (edge.getLayer() == 6 && getIndoorEdgesCheckBox().getState()) {
+				drawableObjects.addDrawable(edge);
+			}
+			else if (edge.getLayer() == 7 && getShowDwellingEdges().getState()){
+				drawableObjects.addDrawable(edge);
+			}
+			else if (edge.getLayer() == 5 && getShowBuildingsCheckBox().getState()) {
+				drawableObjects.addDrawable(edge);
+			}
+		}
+	}
+	/**
+	 * Reacts on item events
+	 */
+	public void itemStateChanged(ItemEvent e){
+		super.itemStateChanged(e);
+		//Showing and hiding building edges
+		if (e.getSource() == getShowBuildingsCheckBox() && !getShowBuildingsCheckBox().getState()){
+			if (drawableObjects != null) {
+				drawableObjects.removeAllObjectsOfLayer(5);
+				repaint();
+			}
+		}
+		if (e.getSource() == getShowBuildingsCheckBox() && getShowBuildingsCheckBox().getState()){
+			if (drawableObjects != null){
+				for (Edge edge : Utility.getAllEdges()){
+					if (edge.getName().contains("walls")){
+						drawEdgeIfRightFloor(edge);
+					}
+				}
+			}
+			repaint();
+		}
+		//Showing and hiding indoor edges
+		if (e.getSource() == getIndoorEdgesCheckBox() && !getIndoorEdgesCheckBox().getState()) {
+			if (drawableObjects != null) {
+				drawableObjects.removeAllObjectsOfLayer(6);
+				repaint();
+			}
+		}
+		if (e.getSource() == getIndoorEdgesCheckBox() && getIndoorEdgesCheckBox().getState()){
+			if (drawableObjects != null) {
+				for (Edge edge : Utility.getAllEdges()){
+					if (edge.getName().contains("inside")){
+						drawEdgeIfRightFloor(edge);
+					}
+				}
+				repaint();
+			}
+		}
+		//Showing and hiding dwelling edges
+		if (e.getSource() == getShowDwellingEdges() && !getShowDwellingEdges().getState()) {
+			if (drawableObjects != null) {
+				drawableObjects.removeAllObjectsOfLayer(7);
+				repaint();
+			}
+		}
+		if (e.getSource() == getShowDwellingEdges() && getShowDwellingEdges().getState()){
+			if (drawableObjects != null) {
+				for (Edge edge : Utility.getAllEdges()){
+					if (edge.getName().contains("dwelling")){
+						drawEdgeIfRightFloor(edge);
+					}
+				}
+				repaint();
+			}
+		}
+
+	}
 
 /**
  * Computes the position of the components.
  */
-public void changeComponentPositions () {
+public void changeComponentPositions() {
 	super.changeComponentPositions();
 	getScaleLabel().setBounds(viewX, viewY+viewHeight+4, 70,23);
 	getComputeButton().setBounds (viewX, viewY+viewHeight+48, 76,29);
 	getAddTimeButton().setBounds (viewX+viewWidth-76, viewY+viewHeight+48, 76,29);
 	getTimeScrollbar().setBounds (viewX, viewY+viewHeight+140, viewWidth,18);
-	getNameLabel().setBounds (viewX+90, viewY+viewHeight+4, 60,23);
+	getNameLabel().setBounds (viewX+90, viewY+ viewHeight+4, 60,23);
 	getMaxTimeLabel().setBounds (viewX, viewY+viewHeight+82, 140,23);
 	getMaxTimeTextField().setBounds (viewX+150, viewY+viewHeight+82, 40,23);
 	getNumObjClassesLabel().setBounds (viewX+viewWidth/2+25, viewY+viewHeight+82, 155,23);
@@ -336,15 +734,29 @@ public void changeComponentPositions () {
 	getObjBeginLabel().setBounds (viewX+viewWidth/2+25, viewY+viewHeight+1, 155,23);
 	getObjBeginTextField().setBounds (viewX+viewWidth/2+185, viewY+viewHeight+1, 30,21);
 	getExtObjBeginTextField().setBounds (viewX+viewWidth/2+220, viewY+viewHeight+1, 30,21);
-	getObjPerTimeLabel().setBounds (viewX+viewWidth/2+25, viewY+viewHeight+23, 155,23);
-	getObjPerTimeTextField().setBounds (viewX+viewWidth/2+185, viewY+viewHeight+23, 30,21);
+	getObjPerTimeLabel().setBounds (viewX+viewWidth/2+25, viewY+viewHeight +23, 155,23);
+	getObjPerTimeTextField().setBounds (viewX+viewWidth/2+185, viewY+viewHeight+ 23, 30,21);
 	getExtObjPerTimeTextField().setBounds (viewX+viewWidth/2+220, viewY+viewHeight+23, 30,21);
 	getCopyrightLabel().setBounds(viewX, viewY+viewHeight+180, viewWidth-100, 19);
-	getReportProbLabel().setBounds (viewX, viewY+viewHeight+112, 148,23);
-	getReportProbTextField().setBounds (viewX+150, viewY+viewHeight+112, 40,23);
+	getReportProbLabel().setBounds (viewX, viewY+viewHeight + 112, 148,23);
+	getReportProbTextField().setBounds (viewX+150, viewY +viewHeight+112, 40,23);
 	getMsdLabel().setBounds (viewX+195, viewY+viewHeight+112, 260,23);
 	getMsdTextField().setBounds (viewX+viewWidth/2+220, viewY+viewHeight+112, 30,23);
 	getDeleteButton().setBounds (viewX+150, viewY+viewHeight+6, 75,29);
+	//NEW UI ELEMENTS Todo remove this comment
+	getMaxNumOfFloorsTextField().setBounds(viewX+viewWidth + (679-500), viewY+viewHeight+1, 21,21);
+	getMaxDwellingTimeText().setBounds(viewX + viewWidth + (679-500), viewY + viewHeight + 23, 21, 21);
+	getMaxNumOfTransfersText().setBounds(viewX + viewWidth + (679-500), viewY + viewHeight + 45, 21, 21);
+	getShowBuildingsCheckBox().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight + 67, 150, 21);
+	getShowDwellingEdges().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight + 89, 150, 21);
+	getIndoorEdgesCheckBox().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight + 111, 150, 21);
+	getMaxNumberOfFloorsLabel().setBounds(viewX + viewWidth + (550-500), viewY+viewHeight+1,150,21);
+	getMaxDwellingTimeLabel().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight + 23,150,21);
+	getMaxNumOfTransfersLabel().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight + 45, 150, 21);
+	getFloorScrollBar().setBounds(viewX + viewWidth + (750-500), viewY + viewHeight, 18,170);
+	getApplyMaxNumOfFloors().setBounds(viewX + viewWidth + (704-500), viewY+viewHeight+1, 42, 21);
+	getPleaseWaitLabel().setBounds(viewX + viewWidth + (620-500), viewY + viewHeight - 22, 150, 21);
+	getReadMovingObjects().setBounds(viewX + viewWidth + (550-500), viewY + viewHeight+140 ,84, 21);
 }
 
 /**
@@ -364,18 +776,23 @@ public void changeComponentPositions () {
  */
 public synchronized void compute () {
 	getComputeButton().setEnabled(false);
+	getReadMovingObjects().setEnabled(false);
+	Utility.setMaxDwellingTime(Integer.parseInt(getMaxDwellingTimeText().getText())); //Sets the maximum dwellingtime to whatever the user has inputted
+	Utility.setMaxTranfers(Integer.parseInt(getMaxNumOfTransfersText().getText())); //Sets the maximum number of transfers
 	showStatus("initialize generation...");
+
 	// access to the network
 	Network net = getNetwork();
 	Nodes nodes = net.getNodes();
 	Edges edges = net.getEdges();
+
 	// initialization of the necessary classes
 	if (time == null) {
 		time = new Time (properties,getValueOfTextField(getMaxTimeTextField(),MIN_MAXTIME,MAX_MAXTIME,false));
 		dataspace = new DataSpace (drawableObjects);
 		objClasses = createObjectClasses (properties,time,dataspace,getValueOfTextField(getNumObjClassesTextField(),1,MAX_OBJCLASSES,false),
 			getValueOfTextField(getReportProbTextField(),0,1000,false),getValueOfTextField(getMsdTextField(),1,1000,true));
-		extObjClasses = createExternalObjectClasses (properties,time,dataspace,getValueOfTextField(getNumExtObjClassesTextField(),1,MAX_EXTOBJCLASSES,false));
+		extObjClasses = createExternalObjectClasses (properties,time,dataspace,getValueOfTextField(getNumExtObjClassesTextField(), 1, MAX_EXTOBJCLASSES, false));
 		if (properties.getProperty(Reporter.VIZ)!=null) {
 			for (int c=0; c<objClasses.getNumber(); c++)
 				for (int i=0; i<=time.getMaxTime(); i++)
@@ -400,9 +817,10 @@ public synchronized void compute () {
 	else
 		wm = new WeightManagerForDataGenerator (edgeClasses,objClasses,null);
 	edges.setWeightManager (wm);
-	ReRoute reroute = createReRoute(properties,time,dataspace);
-	ObjectGenerator objGen = createObjectGenerator (properties,time,dataspace, nodes,objClasses,getValueOfTextField(getObjPerTimeTextField(),0,MAX_OBJPERTIME,true),getValueOfTextField(getObjBeginTextField(),0,MAX_OBJBEGIN,true));
+	ReRoute reroute = createReRoute(properties, time, dataspace);
+	ObjectGenerator objGen = createObjectGenerator(properties, time, dataspace, nodes, objClasses, getValueOfTextField(getObjPerTimeTextField(), 0, MAX_OBJPERTIME, true), getValueOfTextField(getObjBeginTextField(), 0, MAX_OBJBEGIN, true));
 	MovingObjects movingObjects = new MovingObjects (wm,net,objGen,reporter,reroute);
+	listOfObjects = new ArrayList<>(); //Stores all moving objects
 	// the time starts
 	showStatus("generate data, please wait...");
 	util.Timer.reset(1);
@@ -411,7 +829,7 @@ public synchronized void compute () {
 	actTime = time.getCurrTime();
 	// traverse the time
 	while (!time.isMaximumTimeExceeded()) {
-		// move and report all external objects, remove the desd objects
+		// move and report all external objects, remove the dead objects
 		if (extObjectsExist)
 			extObjects.moveAndResizeAndRemoveObjects(actTime,extObjGen,reporter);
 		// move and report all moving objects, remove the objects reaching the destination
@@ -431,12 +849,13 @@ public synchronized void compute () {
 			int objClass = objGen.computeObjectClass(actTime);
 			Node start = objGen.computeStartingNode(actTime,objClass);
 			Node dest = objGen.computeDestinationNode(actTime,start,objGen.computeLengthOfRoute(actTime,objClass),objClass);
-			MovingObject obj = new MovingObject (id,objClass,start,dest,actTime);
+			MovingObject obj = new MovingObject (id,objClass,start,dest,actTime, objGen);
 			obj.addToContainer (movingObjects);
+			listOfObjects.add(obj);
 			// and compute the (first) route
 			while (! obj.computeRoute()) {
-				obj.setStart(objGen.computeStartingNode(actTime,objClass));
-				obj.setDestination(objGen.computeDestinationNode(actTime,start,objGen.computeLengthOfRoute(actTime,objClass),objClass));
+				obj.setStart(objGen.computeStartingNode(actTime, objClass));
+				obj.setDestination(objGen.computeDestinationNode(actTime, start, objGen.computeLengthOfRoute(actTime, objClass), objClass));
 			}
 			obj.reportNewObject (reporter);
 		}
@@ -464,6 +883,7 @@ public synchronized void compute () {
 		if (waitingPeriod > 0)
 			try {wait(waitingPeriod);} catch (Exception e){System.err.println("wait: "+e);}
 	}
+	writeMovingObjectOutput(listOfObjects);
 	util.Timer.stop(1);
 	// report and remove all still existing objects
 	showStatus("remove remaining objects and report statistics...");
@@ -576,11 +996,11 @@ public abstract ObjectClasses createObjectClasses (Properties properties, Time t
  * @return an object generator
  * @param properties properties of the generator
  * @param time the time object
- * @param dataspace the dataspace
+ * @param ds the dataspace
  * @param nodes the nodes of the network
  * @param objClasses description of the object classes
  * @param numOfObjPerTime indicator for the number of objects per time
- * @param numAtBeginning indicator for the number of objects at the beginning
+ * @param numOfObjAtBeginning indicator for the number of objects at the beginning
  */
 public abstract ObjectGenerator createObjectGenerator(Properties properties, Time time, DataSpace ds, Nodes nodes, ObjectClasses objClasses, int numOfObjPerTime, int numOfObjAtBeginning);
 
@@ -611,6 +1031,169 @@ protected void deleteObjects() {
 		reporter.removeReportedObjects();
 	repaint();
 }
+
+	/** Todo Remove this NEW text
+	 * Button for applying changes to max num of floors
+	 */
+	protected Button getApplyMaxNumOfFloors(){
+		if (applyMaxNumOfFloors == null){
+			applyMaxNumOfFloors = new Button();
+			applyMaxNumOfFloors.setName("ApplyMaxNumOfFloors");
+			applyMaxNumOfFloors.setFont(new Font("Dialog", 0, 12));
+			applyMaxNumOfFloors.setLabel("Apply");
+			applyMaxNumOfFloors.setEnabled(true);
+		}
+		return applyMaxNumOfFloors;
+	}
+
+	protected Button getReadMovingObjects(){
+		if (readMovingObjects== null){
+			readMovingObjects = new Button();
+			readMovingObjects.setName("ReadMovingObjects");
+			readMovingObjects.setFont(new Font("Dialog", 0, 12));
+			readMovingObjects.setLabel("Convert Data");
+			readMovingObjects.setEnabled(true);
+		}
+		return readMovingObjects;
+	}
+
+	/** NEW LABEL
+	 * Label saying "please wait" while waiting for buildings to be generated
+	 */
+	protected Label getPleaseWaitLabel(){
+		if (pleaseWaitLabel == null){
+			pleaseWaitLabel = new Label();
+			pleaseWaitLabel.setName("PleaseWaitLabel");
+			pleaseWaitLabel.setFont(new Font("sansserif", 0, 11));
+			pleaseWaitLabel.setText("Please wait");
+			pleaseWaitLabel.setVisible(false);
+		};
+		return pleaseWaitLabel;
+	}
+
+	/** NEW TEXTFIELD
+	 * TextField for number of max floors
+	 */
+	protected TextField getMaxNumOfFloorsTextField(){
+		if (maxNumOfFloorsText == null){
+			maxNumOfFloorsText = new TextField(Integer.toString(Utility.getMaxNumOfFloors()));
+			maxNumOfFloorsText.setName("maxNumOfFloorsTextField");
+			maxNumOfFloorsText.setFont(new Font("Dialog", 0, 11));
+		}
+		return maxNumOfFloorsText;
+	}
+	/** NEW TEXTFIELD
+	 * TextField for maximum dwelling time
+	 */
+	protected TextField getMaxDwellingTimeText(){
+		if (maxDwellingTimeText == null){
+			maxDwellingTimeText = new TextField("10");
+			maxDwellingTimeText.setName("maxDwellingTimeText");
+			maxDwellingTimeText.setFont(new Font("Dialog", 0, 11));
+		}
+		return maxDwellingTimeText;
+	}
+	/** NEW TEXTFIELD
+	 * TextField for maximum number of transfers
+	 */
+	protected TextField getMaxNumOfTransfersText(){
+		if (maxNumOfTransfersText == null){
+			maxNumOfTransfersText = new TextField("5");
+			maxNumOfTransfersText.setName("maxNumOfTransfersText");
+			maxNumOfTransfersText.setFont(new Font("Dialog", 0, 11));
+		}
+		return maxNumOfTransfersText;
+	}
+	/** NEW CHECKBOX
+	 * CheckBox for showing buildings
+	 */
+	protected Checkbox getShowBuildingsCheckBox(){
+		if (showBuildingsCheckBox == null){
+			showBuildingsCheckBox = new Checkbox("Show buildings");
+			showBuildingsCheckBox.setName("ShowBuildingsCheckBox");
+			showBuildingsCheckBox.setFont(new Font("Dialog", 0, 11));
+			showBuildingsCheckBox.setState(true);
+		}
+		return showBuildingsCheckBox;
+	}
+
+	/** NEW CHECKBOX
+	 * Creates indoor edges checkbox
+	 * @return indoor edges checkbox
+	 */
+	protected Checkbox getIndoorEdgesCheckBox(){
+		if (indoorEdgesCheckBox == null){
+			indoorEdgesCheckBox = new Checkbox("Show indoor edges");
+			indoorEdgesCheckBox.setName("IndoorEdgesCheckBox");
+			indoorEdgesCheckBox.setFont(new Font("Dialog", 0, 11));
+		}
+		return indoorEdgesCheckBox;
+	}
+
+	/**
+	 * Creates show dwelling edges checkbox
+	 * @return dwelling edges checkbox
+	 */
+	protected Checkbox getShowDwellingEdges(){
+		if (showDwellingEdges == null){
+			showDwellingEdges = new Checkbox("Show dwelling Edges");
+			showDwellingEdges.setName("showDwellingEdges");
+			showDwellingEdges.setFont(new Font("Dialog", 0, 11));
+		}
+		return showDwellingEdges;
+	}
+	/**
+	 * Label for maximum number of floors
+	 */
+	protected Label getMaxNumberOfFloorsLabel(){
+		if (maxNumberOfFloorsLabel == null){
+			maxNumberOfFloorsLabel = new Label();
+			maxNumberOfFloorsLabel.setName("MaxNumberOfFloorsLabel");
+			maxNumberOfFloorsLabel.setFont(new Font("sansserif", 0, 11));
+			maxNumberOfFloorsLabel.setText("Max number of floors:");
+		};
+		return maxNumberOfFloorsLabel;
+	}
+
+	/**
+	 * Label for max dwelling time
+	 * @return
+	 */
+	protected Label getMaxDwellingTimeLabel(){
+		if (maxDwellingTimeLabel == null){
+			maxDwellingTimeLabel = new Label();
+			maxDwellingTimeLabel.setName("maxDwellingTimeLabel");
+			maxDwellingTimeLabel.setFont(new Font("sansserif", 0, 11));
+			maxDwellingTimeLabel.setText("Max dwelling time:");
+		};
+		return maxDwellingTimeLabel;
+	}
+
+	/**
+	 * Label for max number of transfers
+	 * @return
+	 */
+	protected Label getMaxNumOfTransfersLabel(){
+		if (maxNumOfTransfersLabel == null){
+			maxNumOfTransfersLabel = new Label();
+			maxNumOfTransfersLabel.setName("maxNumOfTransfersLabel");
+			maxNumOfTransfersLabel.setFont(new Font("sansserif",0,11));
+			maxNumOfTransfersLabel.setText("Max number of transfers:");
+		};
+		return maxNumOfTransfersLabel;
+	}
+
+	/**
+	 * Scrollbar for showing floors
+	 * @return
+	 */
+	protected Scrollbar getFloorScrollBar(){
+		if (floorScrollBar == null){
+			floorScrollBar = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
+			floorScrollBar.setName("FloorScrollBar");
+		}
+		return floorScrollBar;
+	}
 
 /**
  * Creates / Returns the add time button.
@@ -701,7 +1284,7 @@ protected Label getMaxTimeLabel() {
 		maxTimeLabel = new Label();
 		maxTimeLabel.setName("MaxTimeLabel");
 		maxTimeLabel.setFont(new Font("sansserif", 0, 12));
-		maxTimeLabel.setText("maximum time ("+MIN_MAXTIME+"-"+MAX_MAXTIME+"):");
+		maxTimeLabel.setText("maximum time (" + MIN_MAXTIME + "-" + MAX_MAXTIME + "):");
 	};
 	return maxTimeLabel;
 }
@@ -768,7 +1351,7 @@ protected Label getNumObjClassesLabel() {
 		numObjClassesLabel = new Label();
 		numObjClassesLabel.setName("NumObjClassesLabel");
 		numObjClassesLabel.setFont(new Font("sansserif", 0, 12));
-		numObjClassesLabel.setText("classes (M:1-"+MAX_OBJCLASSES+"/E:1-"+MAX_EXTOBJCLASSES+"):");
+		numObjClassesLabel.setText("classes (M:1-" + MAX_OBJCLASSES + "/E:1-" + MAX_EXTOBJCLASSES + "):");
 	};
 	return numObjClassesLabel;
 }
@@ -795,7 +1378,7 @@ protected Label getObjBeginLabel() {
 		objBeginLabel = new Label();
 		objBeginLabel.setName("ExtObjPerTimeLabel");
 		objBeginLabel.setFont(new Font("sansserif", 0, 12));
-		objBeginLabel.setText("obj./begin (M:-"+MAX_OBJBEGIN+" E:-"+MAX_EXTOBJBEGIN+"):");
+		objBeginLabel.setText("obj./begin (M:-" + MAX_OBJBEGIN + " E:-" + MAX_EXTOBJBEGIN + "):");
 	};
 	return objBeginLabel;
 }
@@ -822,7 +1405,7 @@ protected Label getObjPerTimeLabel() {
 		objPerTimeLabel = new Label();
 		objPerTimeLabel.setName("ObjPerTimeLabel");
 		objPerTimeLabel.setFont(new Font("sansserif", 0, 12));
-		objPerTimeLabel.setText("obj./time (M:-"+MAX_OBJPERTIME+"/E:-"+MAX_EXTOBJPERTIME+"):");
+		objPerTimeLabel.setText("obj./time (M:-" + MAX_OBJPERTIME + "/E:-" + MAX_EXTOBJPERTIME + "):");
 	};
 	return objPerTimeLabel;
 }
@@ -1059,6 +1642,9 @@ protected void setState (int state) {
 		compute();
 	// Compute button
 	getComputeButton().setEnabled(true);
+	getFloorScrollBar().setMaximum(Utility.getMaxNumOfFloors());
+	getFloorScrollBar().setValue(getFloorScrollBar().getMaximum());
+	getMaxNumOfFloorsTextField().setText(Integer.toString(Utility.getMaxNumOfFloors()));
 }
 
 /**
@@ -1066,37 +1652,160 @@ protected void setState (int state) {
  * @param actTime int
  */
 protected void setTime (int actTime) {
+	drawableObjects.removeAllObjectsOfLayer(Drawable.OBJECTLAYER);
 	// reset old state
 	if (this.actTime != 0) {
-		for (int c=0; c<objClasses.getNumber(); c++)
-			DrawablePresentation.get("Point"+c+"-"+this.actTime).setVisibility(false);
+		//for (int c=0; c<objClasses.getNumber(); c++)
+		//	DrawablePresentation.get("Point"+c+"-"+this.actTime).setVisibility(false);
 		for (int c=0; c<extObjClasses.getNumber(); c++)
 			DrawablePresentation.get("Rectangle"+c+"-"+this.actTime).setVisibility(false);
 	}
 	else
 		for (int t=0; t<=time.getMaxTime(); t++) {
-			for (int c=0; c<objClasses.getNumber(); c++)
-				DrawablePresentation.get("Point"+c+"-"+t).setVisibility(false);
+		//	for (int c=0; c<objClasses.getNumber(); c++)
+		//		DrawablePresentation.get("Point"+c+"-"+t).setVisibility(false);
 			for (int c=0; c<extObjClasses.getNumber(); c++)
 				DrawablePresentation.get("Rectangle"+c+"-"+t).setVisibility(false);
 		}
 	// set new state
 	if (actTime != 0) {
-		for (int c=0; c<objClasses.getNumber(); c++)
-			DrawablePresentation.get("Point"+c+"-"+actTime).setVisibility(true);
+		for (MovingObject mo : listOfObjects){
+			//for (String s : mo.getRouteList()){
+
+			if (mo.getRouteList().containsKey(Integer.toString(actTime))){
+				String s = mo.getRouteList().get(Integer.toString(actTime));
+
+					if (s.contains("Building template:")){
+						String[] tmp = s.split(":");
+						Scanner sc = new Scanner(tmp[5]);
+						int floor = sc.nextInt();
+						sc = new Scanner(tmp[6]);
+						int time = sc.nextInt();
+						sc = new Scanner(tmp[7]);
+						sc.useLocale(Locale.US);
+						int x = (int)sc.nextDouble();
+						sc = new Scanner(tmp[8]);
+						sc.useLocale(Locale.US);
+						int y = (int)sc.nextDouble();
+
+						if (floor == Utility.getActFloorVisual() && time == actTime){
+							DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+mo.getObjectClass()+"-"+time);
+							symbol.setLayer(Drawable.OBJECTLAYER);
+							symbol.getPresentation().setVisibility(true);
+							drawableObjects.addDrawable(symbol);
+						}
+					}
+					else if (!s.contains("Building template:")) {
+						String[] tmp = s.split(":");
+						int j = 0;
+						if (s.contains("Floor: ")){
+							j++;
+						}
+
+						Scanner sc = new Scanner(tmp[j+1]);
+						sc.useLocale(Locale.US);
+						int time = sc.nextInt();
+						sc = new Scanner(tmp[j+2]);
+						sc.useLocale(Locale.US);
+						int x = (int)sc.nextDouble();
+						sc = new Scanner(tmp[j+3]);
+						sc.useLocale(Locale.US);
+						int y = (int)sc.nextDouble();
+						if (time == actTime){
+							DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+mo.getObjectClass()+"-"+time);
+							symbol.setLayer(Drawable.OBJECTLAYER);
+							symbol.getPresentation().setVisibility(true);
+							drawableObjects.addDrawable(symbol);
+						}
+					}
+			}
+			//}
+		}
+
+		/*for (int c=0; c<objClasses.getNumber(); c++) {
+			DrawablePresentation.get("Point" + c + "-" + actTime).setVisibility(true);
+		}*/
+
+		/*
+		for (int c=0; c<objClasses.getNumber(); c++) {
+			if (DrawablePresentation.get("Point" + c + "-" + actTime).inside) {
+				if (DrawablePresentation.get("Point" + c + "-" + actTime).floor == Utility.getActFloorVisual()) {
+					DrawablePresentation.get("Point" + c + "-" + actTime).setVisibility(true);
+				}
+			} else {
+				DrawablePresentation.get("Point" + c + "-" + actTime).setVisibility(true);
+			}
+		}*/
+
+
 		for (int c=0; c<extObjClasses.getNumber(); c++)
 			DrawablePresentation.get("Rectangle"+c+"-"+actTime).setVisibility(true);
 	}
-	else
-		for (int t=0; t<=time.getMaxTime(); t++) {
-			for (int c=0; c<objClasses.getNumber(); c++)
-				DrawablePresentation.get("Point"+c+"-"+t).setVisibility(true);
-			for (int c=0; c<extObjClasses.getNumber(); c++)
-				DrawablePresentation.get("Rectangle"+c+"-"+t).setVisibility(true);
+	else {
+		Utility.numberOfReportedPositions = 0;
+		for (int t = 0; t <= time.getMaxTime(); t++) {
+			/*for (int c=0; c<objClasses.getNumber(); c++)
+				DrawablePresentation.get("Point"+c+"-"+t).setVisibility(true);*/
+			for (int c = 0; c < extObjClasses.getNumber(); c++)
+				DrawablePresentation.get("Rectangle" + c + "-" + t).setVisibility(true);
 		}
+		for (MovingObject mo : listOfObjects){
+			//for (String s : mo.getRouteList()){
+
+			for (Map.Entry<String,String> ss : mo.getRouteList().entrySet()){
+				Utility.numberOfReportedPositions++;
+				String s = ss.getValue();
+
+				if (s.contains("Building template:")){
+					String[] tmp = s.split(":");
+					Scanner sc = new Scanner(tmp[5]);
+					int floor = sc.nextInt();
+					sc = new Scanner(tmp[6]);
+					int time = sc.nextInt();
+					sc = new Scanner(tmp[7]);
+					sc.useLocale(Locale.US);
+					int x = (int)sc.nextDouble();
+					sc = new Scanner(tmp[8]);
+					sc.useLocale(Locale.US);
+					int y = (int)sc.nextDouble();
+
+					DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+mo.getObjectClass()+"-"+time);
+					symbol.setLayer(Drawable.OBJECTLAYER);
+					symbol.getPresentation().setVisibility(true);
+					drawableObjects.addDrawable(symbol);
+				}
+				else {
+					String[] tmp = s.split(":");
+					int j = 0;
+					if (s.contains("Floor: ")){
+						j++;
+					}
+
+					Scanner sc = new Scanner(tmp[j+1]);
+					sc.useLocale(Locale.US);
+					int time = sc.nextInt();
+					sc = new Scanner(tmp[j+2]);
+					sc.useLocale(Locale.US);
+					int x = (int)sc.nextDouble();
+					sc = new Scanner(tmp[j+3]);
+					sc.useLocale(Locale.US);
+					int y = (int)sc.nextDouble();
+					DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+mo.getObjectClass()+"-"+time);
+					symbol.setLayer(Drawable.OBJECTLAYER);
+					symbol.getPresentation().setVisibility(true);
+					drawableObjects.addDrawable(symbol);
+				}
+			}
+			//}
+		}
+/*		for (int c=0; c<objClasses.getNumber(); c++) {
+			DrawablePresentation.get("Point" + c + "-" + actTime).setVisibility(true);
+		}*/
+	}
 	this.actTime = actTime;
-	time.setCurrTime (actTime);
-	getNameLabel().setText("Time: "+String.valueOf(actTime));
+	time.setCurrTime(actTime);
+	getNameLabel().setText("Time: " + String.valueOf(actTime));
+	repaint();
 }
 
 /**
@@ -1106,7 +1815,7 @@ protected void setTime (int actTime) {
 protected void setTimeScrollbar (int t) {
 	int value = t*(timeScrollbar.getMaximum()-timeScrollbar.getVisibleAmount())/time.getMaxTime();
 	timeScrollbar.setValue(value);
-	getNameLabel().setText("Time: "+String.valueOf(t));
+	getNameLabel().setText("Time: " + String.valueOf(t));
 }
 
 /**
@@ -1152,4 +1861,259 @@ public void setViewToPrefinedValue() {
 	viewMapX = getProperty("posx",mapWidth/2/scale);
 	viewMapY = getProperty("posy",mapHeight/2/scale);
 }
+
+	/**
+	 * Writes the output for indoortopology for all moving objects
+	 */
+	public void writeMovingObjectOutput(ArrayList<MovingObject> objList){
+
+		Element trajectories = new Element ("trajectories");
+
+		for (MovingObject m : objList){
+
+			Element trajectory = new Element("trajectory");
+			Element objid = new Element("objid");
+			objid.appendChild(Integer.toString(m.getId()));
+			trajectory.appendChild(objid);
+			Element objclass = new Element("objclass");
+			objclass.appendChild(Integer.toString(m.getObjectClass()));
+			trajectory.appendChild(objclass);
+
+			for (Map.Entry<String,String> ss : m.getRouteList().entrySet()){
+					String s = ss.getValue();
+				//Element flag = new Element("flag");
+
+				if (s.contains("Building template:")){
+					//flag.appendChild("true");
+
+					Element iloc = new Element("iloc");
+					Element itime = new Element("time");
+					Element ipos = new Element("pos");
+					Element buildingID = new Element("buildingID");
+					Element floorID = new Element("floorID");
+					Element roomID = new Element("roomID");
+
+					//oloc.appendChild(otime);
+					//oloc.appendChild(opos);
+
+					iloc.appendChild(itime);
+					iloc.appendChild(ipos);
+					iloc.appendChild(buildingID);
+					iloc.appendChild(floorID);
+					iloc.appendChild(roomID);
+
+					String[] tmp = s.split(":");
+					Scanner sc = new Scanner(tmp[1]);
+					buildingID.appendChild(Integer.toString(sc.nextInt()));
+					sc = new Scanner(tmp[4]);
+					roomID.appendChild(Integer.toString(sc.nextInt()));
+					sc = new Scanner(tmp[5]);
+					floorID.appendChild(Integer.toString(sc.nextInt()));
+					sc = new Scanner(tmp[6]);
+					itime.appendChild(Integer.toString(sc.nextInt()));
+					sc = new Scanner(tmp[7]);
+					sc.useLocale(Locale.US);
+					String tmpPos = Double.toString(sc.nextDouble());
+					sc = new Scanner(tmp[8]);
+					sc.useLocale(Locale.US);
+					tmpPos += " " + Double.toString(sc.nextDouble());
+					ipos.appendChild(tmpPos);
+
+					//trajectory.appendChild(flag);
+					//trajectory.appendChild(oloc);
+					trajectory.appendChild(iloc);
+				}
+				else {
+					Element oloc = new Element("oloc");
+					Element otime = new Element("time");
+					Element opos = new Element("pos");
+
+					//flag.appendChild("false");
+
+					oloc.appendChild(otime);
+					oloc.appendChild(opos);
+
+					//iloc.appendChild(itime);
+					//iloc.appendChild(buildingID);
+					//iloc.appendChild(floorID);
+					//iloc.appendChild(roomID);
+
+					String[] tmp = s.split(":");
+					int j = 0;
+					if (s.contains("Floor: ")){
+						j++;
+					}
+
+					Scanner sc = new Scanner(tmp[j+1]);
+					sc.useLocale(Locale.US);
+					otime.appendChild(Integer.toString(sc.nextInt()));
+					sc = new Scanner(tmp[j+2]);
+					sc.useLocale(Locale.US);
+					String tmpPos = Double.toString(sc.nextDouble());
+					sc = new Scanner(tmp[j+3]);
+					sc.useLocale(Locale.US);
+					tmpPos += " " + Double.toString(sc.nextDouble());
+					opos.appendChild(tmpPos);
+
+					//trajectory.appendChild(flag);
+					trajectory.appendChild(oloc);
+					//trajectory.appendChild(iloc);
+					//trajectories.appendChild(trajectory);
+				}
+			}
+			trajectories.appendChild(trajectory);
+		}
+
+		Document doc = new Document(trajectories);
+
+		try{
+			FileOutputStream fileoutputstream = new FileOutputStream("./output/output.xml");
+
+			Serializer serializer = new Serializer(fileoutputstream, "ISO-8859-1");
+			serializer.setIndent(4);
+			serializer.setMaxLength(128);
+			serializer.write(doc);
+		}
+		catch (IOException ex){
+			System.err.println(ex);
+		}
+	}
+
+	public void readMovingObjectsOutput(){
+		try{
+			listOfObjects.clear();
+			getReadMovingObjects().setEnabled(false);
+			getComputeButton().setEnabled(false);
+			getAddTimeButton().setEnabled(true);
+			reporter = createReporter(properties, drawableObjects);
+			deleteButton.setEnabled(true);
+
+			int maxTime = 0;
+
+			Builder parser = new Builder();
+			File f = new File("./output/output.xml");
+			Document doc = parser.build(f);
+			Element trajectories = doc.getRootElement();
+			//listChildren(trajectories, 0);
+
+			//System.out.println(trajectories.getChild(1).getValue());
+			//System.out.println(trajectories.getChild(0));
+			int count = 0;
+			for (int i = 0; i < trajectories.getChildCount(); i++) {
+
+				if (trajectories.getChild(i) instanceof Element){
+					int objID = Integer.parseInt(trajectories.getChild(i).getChild(1).getValue());
+					int objClass = Integer.parseInt(trajectories.getChild(i).getChild(3).getValue());
+					nu.xom.Node trajectory = trajectories.getChild(i);
+
+					MovingObject mo = new MovingObject(objID, objClass);
+
+					for (int j = 5; j < trajectory.getChildCount(); j = j+2) {
+						nu.xom.Node position = trajectory.getChild(j);
+
+						int time = Integer.parseInt(position.getChild(1).getValue());
+						String location = position.getChild(3).getValue();
+
+						if (time > maxTime){
+							maxTime = time;
+						}
+
+						Scanner sc = new Scanner(location);
+						sc.useLocale(Locale.US);
+						int x = (int)sc.nextDouble();
+						int y = (int)sc.nextDouble();
+
+						if (position.getChildCount() == 11){
+							int floor = Integer.parseInt(position.getChild(7).getValue());
+							//reporter.visualizeIndoorMovingObject(x, y, objClass, time, floor);
+							Map<String, String>tmpRouteList = mo.getRouteList();
+							tmpRouteList.put(Integer.toString(time), "Building template: 0 ButtomX: 0 ButtomY: 0 Room: 0 Floor: " + floor + " Time: " + time + " Last X: " + x + " Last Y:" + y);
+							mo.setRouteList(tmpRouteList);
+						}
+						else {
+							//reporter.visualizeMovingObject(x,y,objClass,time);
+							Map<String, String>tmpRouteList = mo.getRouteList();
+							tmpRouteList.put(Integer.toString(time), "*" + " Time: " + time + " Last X: " + x + " Last Y:" + y);
+							mo.setRouteList(tmpRouteList);
+						}
+					}
+					listOfObjects.add(mo);
+				}
+			}
+			time = new Time(properties, maxTime);
+			dataspace = new DataSpace(drawableObjects);
+			objClasses = createObjectClasses (properties,time,dataspace,getValueOfTextField(getNumObjClassesTextField(),1,MAX_OBJCLASSES,false),
+					getValueOfTextField(getReportProbTextField(),0,1000,false),getValueOfTextField(getMsdTextField(),1,1000,true));
+			extObjClasses = createExternalObjectClasses (properties,time,dataspace,getValueOfTextField(getNumExtObjClassesTextField(),1,MAX_EXTOBJCLASSES,false));
+			if (properties.getProperty(Reporter.VIZ)!=null) {
+				for (int c = 0; c < objClasses.getNumber(); c++)
+					for (int i = 0; i <= time.getMaxTime(); i++)
+						DrawablePresentation.newDrawablePresentation("Point" + c + "-" + i, false, objClasses.getColor(c), Color.red, DrawableSymbol.CIRCLE, 8);
+				for (int c = 0; c < extObjClasses.getNumber(); c++)
+					for (int i = 0; i <= time.getMaxTime(); i++)
+						DrawablePresentation.newDrawablePresentation("Rectangle" + c + "-" + i, false, extObjClasses.getColor(c), Color.red);
+			}
+			drawableObjects.removeAllObjectsOfLayer(Drawable.OBJECTLAYER);
+			setTime(actTime);
+			/*for (int i = 0; i < trajectories.getChildCount(); i++) {
+
+				if (trajectories.getChild(i) instanceof Element){
+					String objID = trajectories.getChild(i).getChild(1).getValue();
+					int objClass = Integer.parseInt(trajectories.getChild(i).getChild(3).getValue());
+					nu.xom.Node trajectory = trajectories.getChild(i);
+
+					for (int j = 5; j < trajectory.getChildCount(); j = j+2) {
+						nu.xom.Node position = trajectory.getChild(j);
+
+						int time = Integer.parseInt(position.getChild(1).getValue());
+						String location = position.getChild(3).getValue();
+
+						if (time > maxTime){
+							maxTime = time;
+						}
+
+						Scanner sc = new Scanner(location);
+						sc.useLocale(Locale.US);
+						int x = (int)sc.nextDouble();
+						int y = (int)sc.nextDouble();
+
+						if (position.getChildCount() == 11){
+							int floor = Integer.parseInt(position.getChild(7).getValue());
+							reporter.visualizeIndoorMovingObject(x,y,objClass,time,floor);
+						}
+						else {
+							reporter.visualizeMovingObject(x,y,objClass,time);
+						}
+					}
+				}
+			}*/
+			getMaxTimeTextField().setEnabled(false);
+			getMaxTimeTextField().setText(Integer.toString(maxTime));
+		}
+		catch (ParsingException ex){
+			System.err.println("ParsingException. Something went wrong reading the output file");
+		}
+		catch (IOException ex){
+			System.err.println("IOException. Something went wrong reading the output file");
+		}
+		repaint();
+	}
+
+	private void bfs(Node s, int mark) {
+		ArrayList<Node> q = new ArrayList<>();
+
+		s.setMark(mark);
+		q.add(s);
+
+		while (!q.isEmpty()) {
+			Node v = q.get(0);
+			q.remove(v);
+			for (Node w : v.getNeighborNodes()) {
+				if (w.getMark() != mark) {
+					w.setMark(mark);
+					q.add(w);
+				}
+			}
+		}
+	}
 }

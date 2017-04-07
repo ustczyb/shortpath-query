@@ -11,6 +11,15 @@
 
     <artifactId>generator</artifactId>
 
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/xom/xom -->
+        <dependency>
+            <groupId>xom</groupId>
+            <artifactId>xom</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+    </dependencies>
 
 
 </project>

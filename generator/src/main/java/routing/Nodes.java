@@ -73,21 +73,21 @@ public Nodes (int numOfClasses) {
 }
 /**
  * Konstruktor.
- * @param edges Container über Kanten
+ * @param edges Container ï¿½ber Kanten
  */
 public Nodes (Edges edges) {
 	this.numOfClasses = edges.getNumOfClasses()+1;
 	hashTable = new Hashtable (10000);
 }
 /**
- * Die Markierungen aller Knoten werden gelöscht.
+ * Die Markierungen aller Knoten werden gelï¿½scht.
  */
 public void clearAllMarks () {
 	maxMark++;
 	nullMark = maxMark;
 }
 /**
- * Gibt Enumeration über alle Knoten zurück.
+ * Gibt Enumeration ï¿½ber alle Knoten zurï¿½ck.
  * @return Enumeration der Knoten
  */
 public Enumeration elements () {
@@ -129,9 +129,49 @@ public Node findNearest (int x, int y) {
 	}
 	return nearestNode;
 }
+	public Node findNearestBuildingNode(int x, int y){
+		if (numOfNodes() == 0)
+			return null;
+		Enumeration e = null;
+		Node node = null;
+		if (objects == null) {
+			e = hashTable.elements();
+			node = (Node)e.nextElement();
+			objects = node.getContainer();
+		}
+		Node testNode = new Node (0,x,y);
+		if (objects != null)
+			try {
+				return (Node)((DrawableObjectsWithSearchTree)objects).findNearestDrawable (x,y,null,new DrawableSpatialSearchTreeObject(testNode));
+			}
+			catch (Exception ex) {
+				System.err.println("Exception in Nodes.findNearest: "+ex);
+			}
+		Node nearestNode = node;
+		double distance = testNode.distanceTo(nearestNode);
+		for (; e.hasMoreElements();) {
+			Node next = (Node)e.nextElement();
+			/**
+			*NEW IF STUFF
+			 */
+			if (next.getName() != null){
+				if (next.getName().contains("Building")){
+					double actDist = testNode.distanceTo(next);
+					if (actDist < distance) {
+						nearestNode = next;
+						distance = actDist;
+					}
+				}
+
+			}
+
+		}
+		return nearestNode;
+
+	}
 /**
- * Gibt den Knoten zurück, der die angegebene ID besitzt.
- * Gibt es keinen solchen Knoten, wird null zurückgegeben.
+ * Gibt den Knoten zurï¿½ck, der die angegebene ID besitzt.
+ * Gibt es keinen solchen Knoten, wird null zurï¿½ckgegeben.
  * @return ggf. gefundener Knoten
  * @param id ID des Knotens
  */
@@ -139,6 +179,10 @@ public Node get (long id) {
 	searchNode.setID(id);
 	return (Node) hashTable.get (searchNode);
 }
+	public Node getS (long id) {
+		searchNode.setsId((int) id);
+		return (Node) hashTable.get (searchNode);
+	}
 /**
  * Returns the next free identifier.
  * @return free identifier
@@ -155,7 +199,7 @@ public int getNumOfClasses () {
 }
 /**
  * Initialisiert die Darstellung der Knoten.
- * @param color Farben für die Kantenklassen
+ * @param color Farben fï¿½r die Kantenklassen
  * @param highlightColor Hervorhebungsfarbe
  */
 public void initPresentation (Color color[], Color highlightColor) {
@@ -185,7 +229,7 @@ public Node newNode (long id, int x, int y, String name) {
 	return node;
 }
 /**
- * Gibt die Anzahl der gespeicherten Knoten zurück.
+ * Gibt die Anzahl der gespeicherten Knoten zurï¿½ck.
  * @return Anzahl
  */
 public int numOfNodes () {
@@ -193,7 +237,7 @@ public int numOfNodes () {
 }
 /**
  * Liest einen Knoten vom DataInput.
- * Schlägt das Einlesen fehl, wird null zurückgegeben.
+ * Schlï¿½gt das Einlesen fehl, wird null zurï¿½ckgegeben.
  * @return eingelesener Knoten
  * @param in Data-Input
  */
@@ -221,6 +265,31 @@ public Node read (DataInput in) {
 		return res;
 	}	
 }
+	public Node readNewData(DataInput in){
+		Node res = null;
+		try {
+			String line = in.readLine();
+			Scanner s = new Scanner(line);
+			long id = s.nextInt();
+			int x = s.nextInt();
+			int y = s.nextInt();
+			String name = "";
+			while (s.hasNext()){
+				name += s.next();
+			}
+			if (name.equals("null")){
+				res = newNode(id,x,y,null);
+			}
+			else {
+				res = newNode(id,x,y,name);
+			}
+			return res;
+		}
+		catch (IOException e){
+			return res;
+		}
+	}
+
 /**
  * Removes the node if its number of edges is zero.
  * @return successful?
@@ -234,15 +303,15 @@ public boolean removeNode (Node node) {
 	return false;
 }
 /**
- * Setzt die Maßstabsgrenzen der Kantenklassen neu.
- * @param newMinScale Maßstabsgrenzen
+ * Setzt die Maï¿½stabsgrenzen der Kantenklassen neu.
+ * @param newMinScale Maï¿½stabsgrenzen
  */
 public void setMinScaleArray (int newMinScale[]) {
 	minScale = newMinScale;
 }
 /**
- * Setzt die Text-Maßstabsgrenzen der Kantenklassen neu.
- * @param newMinTextScale Text-Maßstabsgrenzen
+ * Setzt die Text-Maï¿½stabsgrenzen der Kantenklassen neu.
+ * @param newMinTextScale Text-Maï¿½stabsgrenzen
  */
 public void setMinTextScaleArray (int newMinTextScale[]) {
 	minTextScale = newMinTextScale;

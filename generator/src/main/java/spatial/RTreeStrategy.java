@@ -20,25 +20,25 @@ public interface RTreeStrategy {
 	 * @param  node  non-leaf node where the object should to be inserted
 	 * @param  obj  the new object or the reinserted entry
 	 */
-	int chooseSubtree(SpatialSearchTreeNode node, SpatialSearchTreeEntry obj);
+	int chooseSubtree (SpatialSearchTreeNode node, SpatialSearchTreeEntry obj);
 	/**
 	 * Distributes the entries of a node to two nodes.
 	 * @return  Bitset indicating the entries which should leave the node
 	 * @param  node  the node
 	 * @param  entry  the entry describing the node
 	 */
-	BitSet distribute(SpatialSearchTreeNode node, SpatialSearchTreeEntry entry);
+	BitSet distribute (SpatialSearchTreeNode node, SpatialSearchTreeEntry entry);
 	/**
 	 * Gets the minimum percentage of entries.
 	 * @return  the percentage
 	 */
-	int getMinimum();
+	int getMinimum ();
 	/**
 	 * Returns the percentage of objects which should be reinserted.
 	 * @return  the reinsert factor (0 = no reinsert)
 	 * @param  the height in the tree
 	 */
-	int getReinsertFactor(int height);
+	int getReinsertFactor (int height);
 	/**
 	 * Returns whether the strategy is ordering or not.
 	 * @return  is ordering?
@@ -49,17 +49,17 @@ public interface RTreeStrategy {
 	 * @param  in  stream
 	 * @throws  IOException
 	 */
-	void readParameters(DataInputStream in) throws IOException;
+	void readParameters (DataInputStream in) throws IOException;
 	/**
 	 * Sets the minimum percentage of entries.
 	 * @param  m  the new value
 	 */
-	void setMinimum(int m);
+	void setMinimum (int m);
 	/**
 	 * Sets the quota of entries to be reinserted.
 	 * @param  p  the new value
 	 */
-	void setReinsertFactor(int p);
+	void setReinsertFactor (int p);
 	/**
 	 * Sorts the entries of the given node according to their distance to the center of the parent entry.
 	 * The reinsert factor controls the number of exactly sorted entries.
@@ -67,12 +67,12 @@ public interface RTreeStrategy {
 	 * The last entry should be reinserted first.
 	 * @param  node  the node
 	 */
-	void sortForReinsert(SpatialSearchTreeNode node);
+	void sortForReinsert (SpatialSearchTreeNode node);
 	/**
 	 * Writes parameters to DataOutputStream.
 	 * @param  out  stream
 	 * @throws  IOException
 	 */
-	void writeParameters(DataOutputStream out) throws IOException;
+	void writeParameters (DataOutputStream out) throws IOException;
 
 }

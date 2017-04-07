@@ -37,7 +37,7 @@ public interface SpatialSearchTreeQuery {
 	 * Initializes a query without spatial conditions.
 	 * @param  tree  the searchtree
 	 */
-	void init(SpatialSearchTree tree);
+	void init (SpatialSearchTree tree);
 	
 	/**
 	 * Resets the query.

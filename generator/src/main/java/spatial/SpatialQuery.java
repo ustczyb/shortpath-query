@@ -18,27 +18,27 @@ public interface SpatialQuery {
 	 * @param  queryObj   the query object
 	 * @param  storedObj  the stored object
 	 */
-	boolean areEqual(SpatialSearchTreeObject queryObj, SpatialSearchTreeObject storedObj);
+	boolean areEqual (SpatialSearchTreeObject queryObj, SpatialSearchTreeObject storedObj);
 	/**
 	 * Tests whether the query rectangle and the MBR of a non-leaf entry fulfill the query condition.
 	 * @return  true if the condition is fulfilled
 	 * @param  rect      the query rectangle
 	 * @param  entryMBR  the minimum bounding rectangle of non-leaf entry
 	 */
-	boolean conditionFulfilled(MBR rect, MBR entryMBR);
+	boolean conditionFulfilled (MBR rect, MBR entryMBR);
 	/**
 	 * Tests whether the query rectangle and an leaf entry fulfill the query condition.
 	 * @return  true if the condition is fulfilled
 	 * @param  rect   the query rectangle
 	 * @param  entry  the entry of a leaf entry
 	 */
-	boolean conditionFulfilled(MBR rect, SpatialSearchTreeEntry entry);
+	boolean conditionFulfilled (MBR rect, SpatialSearchTreeEntry entry);
 	/**
 	 * Tests whether the query rectangle and an object fulfill the query condition.
 	 * @return  true if the condition fulfilled
 	 * @param  rect  the query rectangle
 	 * @param  obj   the object
 	 */
-	boolean conditionFulfilled(MBR rect, SpatialSearchTreeObject obj);
+	boolean conditionFulfilled (MBR rect, SpatialSearchTreeObject obj);
 
 }

@@ -1,6 +1,6 @@
 package edu.ustc.cs.model.coordinate;
 
-import edu.ustc.cs.model.vertex.Node;
+import edu.ustc.cs.model.vertex.Point;
 
 /**
  * Created by zyb on 2017/3/21.
@@ -9,7 +9,7 @@ public interface Region {
     /*
     点是否在该区间中
      */
-    public boolean isBelongTo(Node node);
+    public boolean isBelongTo(Point node);
     /*
     区间是否为该区间的子区间
      */
