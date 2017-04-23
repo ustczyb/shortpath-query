@@ -15,15 +15,15 @@ import java.util.List;
  * Created by zyb on 2017/4/10.
  */
 public class ReadBinaryFileTest {
-    @Test
-    public void testFile2Graph() throws IOException {
-        String path = "E:\\code\\shortpath-query\\generator\\src\\main\\resources\\dataset\\Originalnetwork";
-        GraphBundle graphBundle = ReadBinaryFileUtil.File2Graph(path);
-        Nodes nodes = graphBundle.getNodes();
-        CH ch = new CH(graphBundle.getGraph());
-        ch.init();
-        List list = ch.getPathEdges(nodes.get(7442),nodes.get(7416));
-        System.out.println(list);
-    }
+//    @Test
+//    public void testFile2Graph() throws IOException {
+//        String path = "E:\\code\\shortpath-query\\generator\\src\\main\\resources\\dataset\\Originalnetwork";
+//        GraphBundle graphBundle = ReadBinaryFileUtil.File2Graph(path);
+//        Nodes nodes = graphBundle.getNodes();
+//        CH ch = new CH(graphBundle.getGraph());
+//        ch.init();
+//        List list = ch.getPathEdges(nodes.get(7442),nodes.get(7416));
+//        System.out.println(list);
+//    }
 
 }

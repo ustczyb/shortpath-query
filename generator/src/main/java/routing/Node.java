@@ -595,6 +595,31 @@ public class Node extends Drawable {
         }
     }
 
+    public boolean writeNode (BufferedWriter writer) {
+        try {
+            byte l = (byte)getName().length();
+            writer.write(String.valueOf(l));
+            if (l > 0){
+                writer.write(String.valueOf(true));
+                writer.write(name);
+            } else {
+                writer.write(String.valueOf(false));
+            }
+            writer.write(String.valueOf(id) + " ");
+            writer.write(String.valueOf(x) + " ");
+            writer.write(String.valueOf(y) + " ");
+            writer.write(String.valueOf(flag) + " ");
+            writer.write(String.valueOf(floor) + " ");
+            writer.write(String.valueOf(roomNumber) + " ");
+            writer.newLine();
+            writer.flush();
+            return true;
+        }
+        catch (IOException e) {
+            return false;
+        }
+    }
+
     public void writeSIDToStringSimple(PrintWriter out){
         try{
             out.println(sId + " "  + x + " " + y + " " + name);

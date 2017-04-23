@@ -13,5 +13,4 @@ public interface Path<V,E extends Edge> {
     List<E> getEdgeList();
     Double getWeight();
     Path<V, E> append(Path path) throws Exception;
-
 }

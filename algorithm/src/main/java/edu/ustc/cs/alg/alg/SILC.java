@@ -1,6 +1,7 @@
 package edu.ustc.cs.alg.alg;
 
 import edu.ustc.cs.alg.model.edge.Edge;
+import edu.ustc.cs.alg.model.path.ShortestPath;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -31,6 +32,9 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
             for(V w : vSet){
                 if(w != v){
                     GraphPath<V,Edge> path = dijkstra.getPath(v,w);
+                    if(path == null){
+                        continue;
+                    }
                     List<V> list = path.getVertexList();
                     //v->w最短路径上的第一个顶点
                     V firstV = list.get(1);
@@ -45,6 +49,16 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
             }
             hashtable.put(v,table);
         }
+    }
+
+    public ShortestPath<V, Edge> getPath(V source, V sink){
+        List<V> vList = getPathVertex(source, sink);
+        List<Edge> eList = new ArrayList<Edge>();
+        for(int i = 0; i < eList.size()-1; i++){
+            Edge edge = graph.getEdge(vList.get(i), vList.get(i+1));
+            eList.add(edge);
+        }
+        return new ShortestPath<V, Edge>(eList);
     }
 
     @Override
@@ -69,7 +83,7 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
 
     @Override
     public double getPathWeight(V source, V sink) {
-        return 0;
+        return getPath(source, sink).getWeight();
     }
 
 }

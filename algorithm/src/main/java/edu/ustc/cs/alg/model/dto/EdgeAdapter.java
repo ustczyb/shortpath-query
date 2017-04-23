@@ -1,9 +1,10 @@
 package edu.ustc.cs.alg.model.dto;
 
 import edu.ustc.cs.alg.model.edge.Edge;
+import edu.ustc.cs.alg.model.vertex.VertexAdapter;
+import lombok.Getter;
+import lombok.Setter;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import routing.Node;
-import routing.Room;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,42 +13,35 @@ import java.util.List;
  * Created by zyb on 2017/4/7.
  * 边类的适配器，为了使generator生成的边能够让我们的算法使用（实现Edge接口）而不去更改generator的源码
  */
+@Setter
+@Getter
 public class EdgeAdapter extends DefaultWeightedEdge implements Edge {
 
     private long id;
-    private Node source;
-    private Node target;
+    private VertexAdapter source;
+    private VertexAdapter target;
     private Double length;
-    private Room room;
     private short floor;
     private short flag;
-    private String name;
-    private routing.Edge edge;
 
-    public EdgeAdapter(routing.Edge edge){
-        this.edge = edge;
-        this.id = edge.getID();
-        this.source = edge.getNode1();
-        this.target = edge.getNode2();
-        this.length = edge.getLength();
-        this.room = edge.getRoom();
-        this.floor = edge.getFloor();
-        this.flag = edge.getFlag();
-        this.name = edge.getName();
-    }
 
-    public void setSource(Node source) {
+
+    public void setSource(VertexAdapter source) {
         this.source = source;
     }
 
-    public void setTarget(Node target) {
+    public void setTarget(VertexAdapter target) {
         this.target = target;
     }
 
     public EdgeAdapter reverse(){
-        EdgeAdapter reverseEdge = new EdgeAdapter(this.edge);
+        EdgeAdapter reverseEdge = new EdgeAdapter();
         reverseEdge.setSource(target);
         reverseEdge.setTarget(source);
+        reverseEdge.setId(id);
+        reverseEdge.setLength(length);
+        reverseEdge.setFloor(floor);
+        reverseEdge.setFlag(flag);
         return reverseEdge;
     }
 
@@ -55,26 +49,24 @@ public class EdgeAdapter extends DefaultWeightedEdge implements Edge {
     public String toString() {
         return "EdgeAdapter{" +
                 "id=" + id +
-                ", source=" + source.getID() +
-                ", target=" + target.getID() +
+                ", source=" + source.getId() +
+                ", target=" + target.getId() +
                 ", length=" + length +
-                ", room=" + room +
                 ", floor=" + floor +
-                ", flag=" + flag +
-                ", name='" + name + '\'' +
+                ", flag=" + flag + '\'' +
                 '}';
     }
 
-    public Node getSource() {
+    public VertexAdapter getSource() {
         return source;
     }
 
-    public Node getTarget() {
+    public VertexAdapter getTarget() {
         return target;
     }
 
     @Override
-    public Node getAnotherVertex(Object v) {
+    public VertexAdapter getAnotherVertex(Object v) {
         if(source.equals(v)){
             return target;
         } else if(target.equals(v)){
@@ -85,8 +77,8 @@ public class EdgeAdapter extends DefaultWeightedEdge implements Edge {
     }
 
     @Override
-    public List<Node> getVertexs() {
-        List<Node> result = new ArrayList<Node>(2);
+    public List<VertexAdapter> getVertexs() {
+        List<VertexAdapter> result = new ArrayList<VertexAdapter>(2);
         result.add(source);
         result.add(target);
         return result;

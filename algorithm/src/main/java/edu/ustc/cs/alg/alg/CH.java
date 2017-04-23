@@ -2,6 +2,7 @@ package edu.ustc.cs.alg.alg;
 
 
 import edu.ustc.cs.alg.model.edge.ShortCut;
+import edu.ustc.cs.alg.model.vertex.VertexAdapter;
 import edu.ustc.cs.alg.util.FibonacciMap;
 import edu.ustc.cs.alg.model.dto.Priority;
 import edu.ustc.cs.alg.model.edge.Edge;
@@ -137,6 +138,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
         while (!sortMap.isEmpty()){
             V nextOrderedVertex = sortMap.removeMin();
             contract(nextOrderedVertex);
+
             for(Edge edge : graph.edgesOf(nextOrderedVertex)){
                 V adjVertex = (V) edge.getAnotherVertex(nextOrderedVertex);
                 if(!order.contains(adjVertex)){

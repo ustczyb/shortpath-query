@@ -1,5 +1,11 @@
 package edu.ustc.cs.alg;
 
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -105,6 +111,14 @@ public class Main {
             }
         }
         return count == num;
+    }
+
+    @Test
+    public void testWriter() throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter("text.txt"));
+        writer.write(String.valueOf(123));
+        writer.write(String.valueOf(456));
+        writer.close();
     }
 
 

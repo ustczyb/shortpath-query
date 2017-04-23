@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by zyb on 2017/3/16.
  */
-public class ShortestPath<V, E extends Edge> implements Path<V, E> {
+public class ShortestPath<V, E extends Edge> implements Path<V, E>, Comparable {
 
     private List<V> vertexList;
     private List<E> edgeList;
@@ -33,6 +33,8 @@ public class ShortestPath<V, E extends Edge> implements Path<V, E> {
             }
         }
     }
+
+
 
     @Override
     public List getVertexList() {
@@ -67,4 +69,33 @@ public class ShortestPath<V, E extends Edge> implements Path<V, E> {
         }
 
     }
+
+    @Override
+    public int compareTo(Object o) {
+        ShortestPath path2 = (ShortestPath) o;
+        if(weight > path2.getWeight()){
+            return 1;
+        } else if(weight < path2.getWeight()){
+            return -1;
+        } else{
+            return 0;
+        }
+    }
+
+    public ShortestPath reverse() {
+        ShortestPath path = new ShortestPath(reverse(vertexList), reverse(edgeList), weight);
+        return path;
+    }
+
+    private <T> List<T> reverse(List<T> list){
+        int size = list.size();
+        int i = 0;
+        List res = new ArrayList(size);
+        for(T v : list){
+            res.add(size - 1 - i, v);
+            i++;
+        }
+        return res;
+    }
+
 }

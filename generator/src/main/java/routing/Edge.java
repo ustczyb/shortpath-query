@@ -576,6 +576,32 @@ public class Edge extends Drawable implements Comparable  {
         }
     }
 
+    public boolean writeEdge (BufferedWriter writer) {
+        try {
+            byte l = (byte)getName().length();
+            writer.write(String.valueOf(l));
+            if (l > 0){
+                writer.write(String.valueOf(true));
+                writer.write(name);
+            } else {
+                writer.write(String.valueOf(false));
+            }
+            writer.write(String.valueOf(node1.getID()) + " ");
+            writer.write(String.valueOf(node2.getID()) + " ");
+            writer.write(String.valueOf(id) + " ");
+            writer.write(String.valueOf(length) + " ");
+            writer.write(String.valueOf(flag) + " ");
+            writer.write(String.valueOf(floor) + " ");
+            writer.write(String.valueOf(room.getID()) + " ");
+            writer.newLine();
+            writer.flush();
+            return true;
+        }
+        catch (IOException e) {
+            return false;
+        }
+    }
+
     public void writeSIDToStringSimple(PrintWriter out){
         try {
             //out.println(id + " " + node1.getsId() + " " + node2.getsId() + " " + (int)length + " " + edgeClass + " " + name + " ");

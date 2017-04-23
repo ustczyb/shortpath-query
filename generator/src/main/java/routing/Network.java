@@ -401,7 +401,6 @@ protected PathEdge computeResultPath (Node actNode, int way, double distOfOtherW
  * und diese mit BEST markiert.
  * @return berechneter Pfad
  * @param firstNode Ausgangsknoten
- * @param computeWAY2 Soll auch der mit NWAY2-Weg berechnet werden?
  */
 protected PathEdge computeResultPath (Node firstNode, boolean computeNWAY2) {
 	// Fall, da� Knoten nicht gesetzt, abfangen
@@ -477,7 +476,6 @@ protected PathEdge computeResultPath (Node firstNode, boolean computeNWAY2) {
  * Die Distanzen beider Wege werden an den Pfadknoten gesetzt
  * und diese mit BEST markiert.
  * @return berechneter Pfad
- * @param actNode Ausgangsknoten
  * @param way Index des gew�nschten Weges
  */
 protected PathEdge computeResultPathBackwards (Node firstNode, int way) {
@@ -802,23 +800,35 @@ public Nodes getNodes() {
  * @param filename path and basic name of the files
  */
 public void save (String filename) {
-	// write nodes
+
 	try {
+	    // write nodes
 		System.out.println("write nodes ...");
 		FileOutputStream out = new FileOutputStream (filename+".node");
 		DataOutputStream dOut = new DataOutputStream (out);
-		for (Enumeration e = nodes.elements(); e.hasMoreElements();)
-			((Node)e.nextElement()).write (dOut);
+		BufferedWriter nodeWriter = new BufferedWriter(new FileWriter(filename + ".nodedat"));
+		for (Enumeration e = nodes.elements(); e.hasMoreElements();){
+			Node node = (Node)e.nextElement();
+			node.write (dOut);
+			node.writeNode(nodeWriter);
+		}
 		dOut.close();
 		out.close();
+		nodeWriter.close();
+
 		// write edges
 		System.out.println("write edges ...");
 		out = new FileOutputStream (filename+".edge");
 		dOut = new DataOutputStream (out);
-		for (Enumeration e = edges.elements(); e.hasMoreElements();)
-			((Edge)e.nextElement()).write (dOut);
+        BufferedWriter edgeWriter = new BufferedWriter(new FileWriter(filename + ".edgedat"));
+        for (Enumeration e = edges.elements(); e.hasMoreElements();){
+            Edge edge = (Edge)e.nextElement();
+            edge.write (dOut);
+            edge.writeEdge(edgeWriter);
+        }
 		dOut.close();
 		out.close();
+		edgeWriter.close();
 	}
 	catch (IOException ioe) {
 		System.err.println("Network.save: I/O-Error" + ioe.getMessage());
