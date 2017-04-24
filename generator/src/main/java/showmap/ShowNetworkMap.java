@@ -126,7 +126,7 @@ protected String getInfoText (DrawableObject symb) {
 public Network getNetwork() {
 	return net;
 }
-/**
+	/**
  * Initialisieren des Applets.
  */
 public void init () {
@@ -224,6 +224,9 @@ protected int readDrawables (int objNum, URL url, int index) {
 		return objNum;
 	}
 }
+//public void cleanDrawables()
+
+
 /**
  * Setzt den/die zuvor berechneten Weg(e) zurück.
  */

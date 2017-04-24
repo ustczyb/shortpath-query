@@ -9,7 +9,7 @@ MAX_EXTOBJPERTIME = 3
 MAX_EXTOBJBEGIN = 10
 
 ! setting of the generator
-urlne = dataset\\network
+urlne = dataset\\Originalnetwork
 !urlnez = dataset\\network
 !waitingPeriod = 1
 !DSO

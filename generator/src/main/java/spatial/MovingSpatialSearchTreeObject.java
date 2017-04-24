@@ -12,6 +12,6 @@ public interface MovingSpatialSearchTreeObject extends SpatialSearchTreeObject {
 	 * Returns the number of the layer.
 	 * @return  the layer
 	 */
-	void setMBR(MBR newMBR);
+	void setMBR (MBR newMBR);
 
 }

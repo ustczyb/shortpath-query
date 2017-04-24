@@ -60,6 +60,15 @@ public class DrawablePresentation {
 	protected boolean visible = true;
 
 	/**
+	 * Floor number for moving objects
+	 */
+	public int floor = 0;
+	/**
+	 * Flag for knowing if the drawable is a moving object inside a building
+	 */
+	public boolean inside = false;
+
+	/**
 	 * Color of the border.
 	 */
 	protected Color color = Color.black;
@@ -99,9 +108,9 @@ public class DrawablePresentation {
 	private DrawablePresentation nextOfOther = null;
 
 /**
- * Gibt das Darstellungsobjekt zurück, das den gleichen Namen hat und für den angegebenen Maßstab gilt.
+ * Gibt das Darstellungsobjekt zurï¿½ck, das den gleichen Namen hat und fï¿½r den angegebenen Maï¿½stab gilt.
  * @return gefundenes DrawablePresentation-Objekt
- * @param scale akt. Maßstab
+ * @param scale akt. Maï¿½stab
  */
 private DrawablePresentation get (int scale) {
 	DrawablePresentation actObj = this;
@@ -146,77 +155,77 @@ public static DrawablePresentation get (String name) {
 	return first;
 }
 /**
- * Gibt die Randfarbe zurück.
+ * Gibt die Randfarbe zurï¿½ck.
  * @return Farbe
  */
 public Color getColor () {
 	return color;
 }
 /**
- * Gibt die Füllfarbe zurück.
+ * Gibt die Fï¿½llfarbe zurï¿½ck.
  * @return Farbe
  */
 public Color getFillColor () {
 	return fillColor;
 }
 /**
- * Gibt den Namen zurück.
+ * Gibt den Namen zurï¿½ck.
  * @return Name
  */
 public String getName () {
 	return name;
 }
 /**
- * Gibt das nächste Darstellungsobjekt zurück, das den gleichen Namen hat.
+ * Gibt das nï¿½chste Darstellungsobjekt zurï¿½ck, das den gleichen Namen hat.
  * @return gefundenes DrawablePresentation-Objekt (oder null)
  */
 public DrawablePresentation getNext () {
 	return nextOfSame;
 }
 /**
- * Gibt den Offset zurück.
+ * Gibt den Offset zurï¿½ck.
  * @return Offset
  */
 public int getOffset () {
 	return offset;
 }
 /**
- * Gibt die Selektierbarkeit zurück.
+ * Gibt die Selektierbarkeit zurï¿½ck.
  * @return selektierbar?
  */
 public boolean getSelectability () {
 	return selectable;
 }
 /**
- * Gibt die Selektionsrandfarbe zurück.
+ * Gibt die Selektionsrandfarbe zurï¿½ck.
  * @return Farbe
  */
 public Color getSelectionColor () {
 	return selectionColor;
 }
 /**
- * Gibt die Selektionsfüllfarbe zurück.
+ * Gibt die Selektionsfï¿½llfarbe zurï¿½ck.
  * @return Farbe
  */
 public Color getSelectionFillColor () {
 	return selectionFillColor;
 }
 /**
- * Gibt die Größe zurück.
- * @return Größe
+ * Gibt die Grï¿½ï¿½e zurï¿½ck.
+ * @return Grï¿½ï¿½e
  */
 public int getSize () {
 	return size;
 }
 /**
- * Gibt den Typ zurück.
+ * Gibt den Typ zurï¿½ck.
  * @return Typ
  */
 public int getType () {
 	return type;
 }
 /**
- * Gibt die grundsätzliche Sichtbarkeit zurück.
+ * Gibt die grundsï¿½tzliche Sichtbarkeit zurï¿½ck.
  * @return sichtbar?
  */
 public boolean getVisibility () {
@@ -243,7 +252,7 @@ public static DrawablePresentation newDrawablePresentation (String name) {
 	// create object
 	DrawablePresentation newObj = new DrawablePresentation();
 	newObj.name = name;
-	// und anhängen
+	// und anhï¿½ngen
 	DrawablePresentation father = get(name);
 	if (father.name.equals(name)) {
 		father = father.get(-1);
@@ -279,7 +288,7 @@ public static DrawablePresentation newDrawablePresentation (String name, int mod
  * @param color Randfarbe
  * @param selectionColor Selektionsrandfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  */
 public static DrawablePresentation newDrawablePresentation (String name, int mode, int value, boolean selectable, Color color, Color selectionColor, int type, int size) {
 	return newDrawablePresentation (name,mode,value, selectable,color,color,selectionColor,selectionColor, type,size);
@@ -294,10 +303,10 @@ public static DrawablePresentation newDrawablePresentation (String name, int mod
  * @param color Randfarbe
  * @param selectionColor Selektionsrandfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  * @param offset Offset in Pixel
- * @param minScale (eingeschlossener) Minimal-Maßstab
- * @param maxScale (nicht mehr eingeschlossener) Maximal-Maßstab
+ * @param minScale (eingeschlossener) Minimal-Maï¿½stab
+ * @param maxScale (nicht mehr eingeschlossener) Maximal-Maï¿½stab
  */
 public static DrawablePresentation newDrawablePresentation (String name, int mode, int value, boolean selectable, Color color, Color selectionColor, int type, int size, int offset, int minScale, int maxScale) {
 	return newDrawablePresentation (name,mode,value, selectable,color,color,selectionColor,selectionColor, type,size,offset, minScale,maxScale);
@@ -310,9 +319,9 @@ public static DrawablePresentation newDrawablePresentation (String name, int mod
  * @param value Wert
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  */
 public static DrawablePresentation newDrawablePresentation (String name, int mode, int value, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor) {
 	DrawablePresentation newObj = newDrawablePresentation (name);
@@ -333,11 +342,11 @@ public static DrawablePresentation newDrawablePresentation (String name, int mod
  * @param value Wert
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  */
 public static DrawablePresentation newDrawablePresentation (String name, int mode, int value, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor, int type, int size) {
 	DrawablePresentation newObj = newDrawablePresentation (name,mode,value, selectable,color,fillColor,selectionColor,selectionFillColor);
@@ -353,14 +362,14 @@ public static DrawablePresentation newDrawablePresentation (String name, int mod
  * @param value Wert
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  * @param offset Offset in Pixel
- * @param minScale (eingeschlossener) Minimal-Maßstab
- * @param maxScale (nicht mehr eingeschlossener) Maximal-Maßstab
+ * @param minScale (eingeschlossener) Minimal-Maï¿½stab
+ * @param maxScale (nicht mehr eingeschlossener) Maximal-Maï¿½stab
  */
 public static DrawablePresentation newDrawablePresentation (String name, int mode, int value, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor, int type, int size, int offset, int minScale, int maxScale) {
 	DrawablePresentation newObj = newDrawablePresentation (name,mode,value, selectable,color,fillColor,selectionColor,selectionFillColor, type,size);
@@ -388,7 +397,7 @@ public static DrawablePresentation newDrawablePresentation (String name, boolean
  * @param color Randfarbe
  * @param selectionColor Selektionsrandfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  */
 public static DrawablePresentation newDrawablePresentation (String name, boolean selectable, Color color, Color selectionColor, int type, int size) {
 	return newDrawablePresentation (name, selectable,color,color,selectionColor,selectionColor, type,size);
@@ -401,10 +410,10 @@ public static DrawablePresentation newDrawablePresentation (String name, boolean
  * @param color Randfarbe
  * @param selectionColor Selektionsrandfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  * @param offset Offset in Pixel
- * @param minScale (eingeschlossener) Minimal-Maßstab
- * @param maxScale (nicht mehr eingeschlossener) Maximal-Maßstab
+ * @param minScale (eingeschlossener) Minimal-Maï¿½stab
+ * @param maxScale (nicht mehr eingeschlossener) Maximal-Maï¿½stab
  */
 public static DrawablePresentation newDrawablePresentation (String name, boolean selectable, Color color, Color selectionColor, int type, int size, int offset, int minScale, int maxScale) {
 	return newDrawablePresentation (name, selectable,color,color,selectionColor,selectionColor, type,size,offset, minScale,maxScale);
@@ -415,9 +424,9 @@ public static DrawablePresentation newDrawablePresentation (String name, boolean
  * @param name Name
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  */
 public static DrawablePresentation newDrawablePresentation (String name, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor) {
 	return newDrawablePresentation (name,ALLMODES,NOVALUE, selectable,color,fillColor,selectionColor,selectionFillColor);
@@ -428,11 +437,11 @@ public static DrawablePresentation newDrawablePresentation (String name, boolean
  * @param name Name
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  */
 public static DrawablePresentation newDrawablePresentation (String name, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor, int type, int size) {
 	return newDrawablePresentation (name,ALLMODES,NOVALUE, selectable,color,fillColor,selectionColor,selectionFillColor,type,size);
@@ -443,14 +452,14 @@ public static DrawablePresentation newDrawablePresentation (String name, boolean
  * @param name Name
  * @param selectable selektierbar?
  * @param color Randfarbe
- * @param fillColor Füllfarbe
+ * @param fillColor Fï¿½llfarbe
  * @param selectionColor Selektionsrandfarbe
- * @param selectionFillColor Selektionsfüllfarbe
+ * @param selectionFillColor Selektionsfï¿½llfarbe
  * @param type Typ
- * @param size Größe in Pixel/Punkt
+ * @param size Grï¿½ï¿½e in Pixel/Punkt
  * @param offset Offset in Pixel
- * @param minScale (eingeschlossener) Minimal-Maßstab
- * @param maxScale (nicht mehr eingeschlossener) Maximal-Maßstab
+ * @param minScale (eingeschlossener) Minimal-Maï¿½stab
+ * @param maxScale (nicht mehr eingeschlossener) Maximal-Maï¿½stab
  */
 public static DrawablePresentation newDrawablePresentation (String name, boolean selectable, Color color, Color fillColor, Color selectionColor, Color selectionFillColor, int type, int size, int offset, int minScale, int maxScale) {
 	return newDrawablePresentation (name,ALLMODES,NOVALUE, selectable,color,fillColor,selectionColor,selectionFillColor, type,size,offset, minScale,maxScale);
@@ -465,7 +474,7 @@ public DrawablePresentation setColor (Color pColor) {
 	return this;
 }
 /**
- * Setzt die Füllfarbe.
+ * Setzt die Fï¿½llfarbe.
  * @return this
  * @param pColor Farbe
  */
@@ -485,7 +494,7 @@ public DrawablePresentation setOffset (int pOffset) {
 /**
  * Schaltet die Selektierbarkeit.
  * @return this
- * @param s Selektivität
+ * @param s Selektivitï¿½t
  */
 public DrawablePresentation setSelectability (boolean s) {
 	selectable = s;
@@ -501,7 +510,7 @@ public DrawablePresentation setSelectionColor (Color pColor) {
 	return this;
 }
 /**
- * Setzt die Selektionsfüllfarbe.
+ * Setzt die Selektionsfï¿½llfarbe.
  * @return this
  * @param pColor Farbe
  */
@@ -510,9 +519,9 @@ public DrawablePresentation setSelectionFillColor (Color pColor) {
 	return this;
 }
 /**
- * Setzt die Größe.
+ * Setzt die Grï¿½ï¿½e.
  * @return this
- * @param pSize Größe
+ * @param pSize Grï¿½ï¿½e
  */
 public DrawablePresentation setSize (int pSize) {
 	size = pSize;
@@ -528,7 +537,7 @@ public DrawablePresentation setType (int pType) {
 	return this;
 }
 /**
- * Schaltet die grundsätzliche Sichtbarkeit an bzw. aus.
+ * Schaltet die grundsï¿½tzliche Sichtbarkeit an bzw. aus.
  * @return this
  * @param on sichtbar?
  */

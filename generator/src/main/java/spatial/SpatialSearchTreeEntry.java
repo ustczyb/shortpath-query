@@ -14,7 +14,7 @@ public interface SpatialSearchTreeEntry {
 	 * Returns the minimum bounding rectangle.
 	 * @return  minimum bounding rectangle
 	 */
-	MBR getMBR();
+	MBR getMBR ();
 	
 	/**
 	 * Returns the number of dimensions.

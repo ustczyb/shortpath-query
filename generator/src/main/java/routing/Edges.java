@@ -67,15 +67,15 @@ public void clearAllMarks () {
 	nullMark++;
 }
 /**
- * Gibt Enumeration über alle Kanten zurück.
+ * Gibt Enumeration ï¿½ber alle Kanten zurï¿½ck.
  * @return Enumeration der Kanten
  */
 public Enumeration elements () {
 	return hashTable.elements();
 }
 /**
- * Gibt die Kante zurück, dieer die angegebene ID besitzt.
- * Gibt es keine solche Kante, wird null zurückgegeben.
+ * Gibt die Kante zurï¿½ck, dieer die angegebene ID besitzt.
+ * Gibt es keine solche Kante, wird null zurï¿½ckgegeben.
  * @return ggf. gefundene Kante
  * @param id ID der Kante
  */
@@ -98,7 +98,7 @@ public int getNumOfClasses () {
 	return numOfClasses;
 }
 /**
- * Gibt die Geschwindigkeit der angegebenen Kantenklasse zurück.
+ * Gibt die Geschwindigkeit der angegebenen Kantenklasse zurï¿½ck.
  * @return Geschwindigkeit
  * @param pClass Kantenklasse
  */
@@ -106,7 +106,7 @@ public int getSpeed (int pClass) {
 	return speed[Num.putIntoInterval (pClass,0,numOfClasses)];
 }
 /**
- * Gibt das Objekt zur Kantenbewertung zurück.
+ * Gibt das Objekt zur Kantenbewertung zurï¿½ck.
  * @return Objekt zur Kantenbewertung
  */
 public WeightManager getWeightManager () {
@@ -114,7 +114,7 @@ public WeightManager getWeightManager () {
 }
 /**
  * Initialisiert die Darstellung der Kanten.
- * @param color Farben für die Kantenklassen
+ * @param color Farben fï¿½r die Kantenklassen
  * @param highlightColor Hervorhebungsfarbe
  */
 public void initPresentation (Color color[], Color highlightColor) {
@@ -123,11 +123,11 @@ public void initPresentation (Color color[], Color highlightColor) {
 	DrawablePresentation.newDrawablePresentation("EdgeH",false,highlightColor,highlightColor);
 }
 /**
- * Erzeugt neue Kante und fügt diese in Container ein.
- * Existiert bereits eine Kante mit der angegebenen ID, wird diese statt dessen zurückgegeben.
+ * Erzeugt neue Kante und fï¿½gt diese in Container ein.
+ * Existiert bereits eine Kante mit der angegebenen ID, wird diese statt dessen zurï¿½ckgegeben.
  * @return neu erzeugte / gefundene Kante
  * @param id ID
- * @param edgsClass Kantenklasse
+ * @param edgeClass Kantenklasse
  * @param node1 Startknoten
  * @param node2 Zielknoten
  * @param name Kantenname
@@ -147,7 +147,7 @@ public Edge newEdge (long id, int edgeClass, Node node1, Node node2, String name
 	return edge;
 }
 /**
- * Gibt die Anzahl der gespeicherten Kanten zurück.
+ * Gibt die Anzahl der gespeicherten Kanten zurï¿½ck.
  * @return Anzahl
  */
 public int numOfEdges () {
@@ -155,10 +155,10 @@ public int numOfEdges () {
 }
 /**
  * Liest eine Kante vom DataInput.
- * Schlägt das Einlesen fehl, wird null zurückgegeben.
+ * Schlï¿½gt das Einlesen fehl, wird null zurï¿½ckgegeben.
  * @return eingelesene Kante
  * @param in DataInput
- * @param nodes Container für Knoten
+ * @param nodes Container fï¿½r Knoten
  */
 public Edge read (DataInput in, Nodes nodes) throws IOException {
 	Edge res = null;
@@ -178,9 +178,37 @@ public Edge read (DataInput in, Nodes nodes) throws IOException {
 		long eID = in.readLong();
 		int eClass = in.readInt();
 		res = newEdge (eID,eClass,pNode1,pNode2,null);
-	}	
+	}
 	return res;
 }
+	public Edge readNewData(DataInput in, Nodes nodes){
+		Edge res = null;
+		try {
+			String line = in.readLine();
+			Scanner s = new Scanner(line);
+			long eid = s.nextLong();
+			long id1 = s.nextLong();
+			long id2 = s.nextLong();
+			Node n1 = nodes.getS(id1);
+			Node n2 = nodes.getS(id2);
+			double length = s.nextDouble();
+			int eClass = s.nextInt();
+			String name = "";
+			while (s.hasNext()){
+				name += s.next();
+			}
+			if (name.equals("null")){
+				res = newEdge(eid,eClass,n1,n2,null);
+			}
+			else {
+				res = newEdge(eid,eClass,n1,n2,name);
+			}
+			return res;
+		}
+		catch (IOException e){
+			return res;
+		}
+	}
 /**
  * Removes an edge.
  * @return sucessful?
@@ -195,8 +223,8 @@ public boolean removeEdge (Edge edge) {
 	return true;
 }
 /**
- * Setzt die Maßstabsgrenzen der Kantenklassen neu.
- * @param newMinScale Maßstabsgrenzen
+ * Setzt die Maï¿½stabsgrenzen der Kantenklassen neu.
+ * @param newMinScale Maï¿½stabsgrenzen
  */
 public void setMinScaleArray (int newMinScale[]) {
 	minScale = newMinScale;

@@ -1,6 +1,8 @@
 package generator2;
 
 import java.util.*;
+
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import routing.*;
 
 /**
@@ -175,16 +177,26 @@ private Node computeNode (int time, int objClass, boolean start) {
 		int dy = dataspace.getMaxY()-dataspace.getMinY();
 		int x = Math.abs(random.nextInt())%(dx+1) + dataspace.getMinX();
 		int y = Math.abs(random.nextInt())%(dy+1) + dataspace.getMinY();
-		return nodes.findNearest (x,y);
+		if (!start){ //Checks if we are computing a destination node, if we are, we make sure only to find a node inside a building
+			return nodes.findNearestBuildingNode(x, y);
+		}
+		else {
+			return nodes.findNearest(x, y);
+		}
 	}
 	// the network-based approach
 	else {
 		int index = Math.abs(random.nextInt())%node.length;
+		if (!start){ //If we are computing a destination node we make sure that it is inside a building by checking the name
+			while (!node[index].getName().contains("Building") && node[index].getFirstEdge().getName().contains("walls")){
+				index = Math.abs(random.nextInt())%node.length;
+			}
+		}
 		try {
-		return node[index];
+			return node[index];
 		}
 		catch (Exception ex) {
-			System.err.println(index);
+			System.err.println("This should not happen" + index);
 			return node[index-1];
 		}
 	}

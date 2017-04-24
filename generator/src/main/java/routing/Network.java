@@ -3,8 +3,10 @@ package routing;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.zip.*;
 import drawables.*;
+import generator2.DataGenerator;
 import util.*;
 
 /**
@@ -21,40 +23,40 @@ import util.*;
 public class Network {
 
 	/**
-	 * 	Container für Knoten
+	 * 	Container fï¿½r Knoten
 	 */
 	protected Nodes nodes = null;
 	/**
-	 * 	Container für Kanten
+	 * 	Container fï¿½r Kanten
 	 */
 	protected Edges edges = null;
 	/**
-	 * 	Heap für den Rand
+	 * 	Heap fï¿½r den Rand
 	 */
 	private BorderHeap border = new BorderHeap();
 	
 	/**
-	 * 	Distanz-Wert für unendlich
+	 * 	Distanz-Wert fï¿½r unendlich
 	 */
 	private static final double maxDistance = Double.MAX_VALUE;
 	/**
-	 * 	Knoten-Weg-Index für Weg1
+	 * 	Knoten-Weg-Index fï¿½r Weg1
 	 */
 	private static final int NWAY1 = 1;
 	/**
-	 * 	Knoten-Weg-Index für Weg2
+	 * 	Knoten-Weg-Index fï¿½r Weg2
 	 */
 	private static final int NWAY2 = 2;
 	/**
-	 * 	allgemeine Knoten-Markierung für Wege
+	 * 	allgemeine Knoten-Markierung fï¿½r Wege
 	 */
 	private static final int WAY = 1;
 	/**
-	 * 	Knoten-Markierung für Weg1
+	 * 	Knoten-Markierung fï¿½r Weg1
 	 */
 	private int WAY1 = NWAY1;
 	/**
-	 * 	Knoten-Markierung für Weg2
+	 * 	Knoten-Markierung fï¿½r Weg2
 	 */
 	private int WAY2 = NWAY2;
 	/**
@@ -106,7 +108,7 @@ public PathEdge computeFastestWay (Node start, Node stop) {
 
 /**
  * Berechnet einen schnellen Weg (oft den schnellsten) zwischen 2 Knoten.
- * Die Berechnung wird nur vom Startknoten aus durchgeführt.
+ * Die Berechnung wird nur vom Startknoten aus durchgefï¿½hrt.
  * @return berechneter Weg
  * @param start Startknoten
  * @param stop Stopknoten
@@ -119,7 +121,7 @@ public PathEdge computeFastWay (Node start, Node stop) {
 	start.clearWays();
 	start.mark(FINAL);
 	start.mark(BEST);
-	start.setDistanceOfWay(WAY,0);
+	start.setDistanceOfWay(WAY, 0);
 	border.reset();
 	// Durchlauf
 	enlargeBorder (border, start,stop, WAY, true);
@@ -137,7 +139,7 @@ public PathEdge computeFastWay (Node start, Node stop) {
 /**
  * Berechnet einen schnellen Weg (oft den schnellsten) zwischen 2 Knoten.
  * Im Gegensatz zu computeFastWay wird die Berechnung von beiden Knoten
- * gleichberechtigt durchgeführt.
+ * gleichberechtigt durchgefï¿½hrt.
  * @return berechneter Weg
  * @param start Startknoten
  * @param stop Stopknoten
@@ -149,28 +151,28 @@ public PathEdge computeFastWay2 (Node start, Node stop) {
 	nodes.clearAllMarks();
 	start.clearWays();
 	start.mark(WAY1);
-	start.setDistanceOfWay(WAY1,0);
+	start.setDistanceOfWay(WAY1, 0);
 	stop.clearWays();
 	stop.mark(WAY2);
 	stop.setDistanceOfWay(WAY2,0);
 	border.reset();
 	// Durchlauf
-	enlargeBorder (border, start,stop, WAY1, true);
-	enlargeBorder (border, stop,start, WAY2, true);
+	enlargeBorder(border, start, stop, WAY1, true);
+	enlargeBorder(border, stop, start, WAY2, true);
 	boolean elementFound = border.fetchFirst();
 	Node actNode = null;
 	while (elementFound) {
 		//System.out.print("markiere: "); element.debugPrint(); System.out.println();
 		actNode = border.returnNode();
-		// Fall 1: Knoten gehört zu WAY1
+		// Fall 1: Knoten gehï¿½rt zu WAY1
 		if (actNode.isMarked(WAY1)) {
 			actNode.mark(FINAL);
-			// falls er auch zu WAY2 gehört, sind beide Wege nun aufeinander getroffen => fertig
+			// falls er auch zu WAY2 gehï¿½rt, sind beide Wege nun aufeinander getroffen => fertig
 			if (actNode.isMarked(WAY2))
 				break;
 			enlargeBorder (border, actNode,stop, WAY1, true);
 		}	
-		// Fall 2: Knoten gehört zu WAY2
+		// Fall 2: Knoten gehï¿½rt zu WAY2
 		else if (actNode.isMarked(WAY2)) {
 			actNode.mark(FINAL);
 			enlargeBorder (border, actNode,start,WAY2, true);
@@ -198,23 +200,23 @@ public PathEdge computeFastWay2 (Node start, Node stop) {
 
 /**
  * Berechnet die Wege zwischen 2 Knoten, die nicht um den angegebenen Prozentsatz
- * schlechter sind als der kürzeste Weg. <BR>
- * Einschränkungen: <BR>
+ * schlechter sind als der kï¿½rzeste Weg. <BR>
+ * Einschrï¿½nkungen: <BR>
  * - keine Zyklen <BR>
- * - keine Rückwege (kann evtl. auch ungünstige Querverbindungen treffen <BR>
+ * - keine Rï¿½ckwege (kann evtl. auch ungï¿½nstige Querverbindungen treffen <BR>
  * @return berechneter Weg
  * @param start Startknoten
  * @param stop Stopknoten
  * @param threshold Prozentsatz, um den ein Weg schlechter sein darf
  */
 public PathEdge computeFastWays (Node start, Node stop, int threshold) {
-	// Prüfen, ob Weg berechenbar
+	// Prï¿½fen, ob Weg berechenbar
 	if ((start == null) || (stop == null) || (start.equals(stop)))
 		return null;
 	// Initialisierung
 	border.reset();					// Rand
 	PathEdge resPath = null;					// Ergebnis
-	double shortestDistance = maxDistance;		// Distanz des kürzesten Wegs
+	double shortestDistance = maxDistance;		// Distanz des kï¿½rzesten Wegs
 	// Knoten initilisieren und markieren
 	nodes.clearAllMarks();
 	start.clearWays();
@@ -222,28 +224,28 @@ public PathEdge computeFastWays (Node start, Node stop, int threshold) {
 	start.setDistanceOfWay(NWAY1,0);
 	stop.clearWays();
 	stop.mark(WAY2);
-	stop.setDistanceOfWay(NWAY2,0);
+	stop.setDistanceOfWay(NWAY2, 0);
 	// zweifacher Durchlauf
 	for (int numOfLoops=1; true; numOfLoops++) {
 		System.out.println ("** Durchlauf "+numOfLoops+" **");
 		// Start- und Zielknoten in Rand aufnehmen
 		enlargeBorder (border, start,stop, WAY1, threshold,shortestDistance,resPath);
 		enlargeBorder (border, stop,start, WAY2, threshold,shortestDistance,resPath);
-		// Abarbeiten und Ergänzen des Randes
+		// Abarbeiten und Ergï¿½nzen des Randes
 		boolean elementFound = border.fetchFirst();
 		while (elementFound) {
-			// Prüfen, ob Weg zu lang => ggf. Durchlauf abbrechen
+			// Prï¿½fen, ob Weg zu lang => ggf. Durchlauf abbrechen
 			if (border.returnDistance()*100/(100+threshold) > shortestDistance)
 				break;
 			Node actNode = border.returnNode();
 			actNode.mark(FINAL);
-			// Fall 1: Knoten gehört zu NWAY1
+			// Fall 1: Knoten gehï¿½rt zu NWAY1
 			if (actNode.isMarked(WAY1)) {
 				// Fall 1a: BEST-Knoten => diesen im ersten Durchlauf ignorieren
 				if ( (numOfLoops == 1) && (actNode.isMarked(BEST)) ) {
 					//System.out.print("BEST: "); actNode.debugPrint(NWAY1); System.out.println();
 				}
-				// Fall 1b: Knoten gehört auch zu NWAY2
+				// Fall 1b: Knoten gehï¿½rt auch zu NWAY2
 				else if (actNode.isMarked(WAY2)) {
 					// im ersten Durchgang ggf. Wege berechnen
 					if (numOfLoops == 1) {
@@ -257,33 +259,33 @@ public PathEdge computeFastWays (Node start, Node stop, int threshold) {
 						// oder einen weiteren, hinreichend kurzen Weg
 						else if ((actNode.getDistanceOfWay(NWAY1)+actNode.getDistanceOfWay(NWAY2))*100/(100+threshold) <= shortestDistance) {
 							resPath.addPath (computeResultPath(actNode,true));
-							// möglicherweise ist dieser Pfad sogar kürzer!
+							// mï¿½glicherweise ist dieser Pfad sogar kï¿½rzer!
 							if (actNode.getDistanceOfWay(NWAY1)+actNode.getDistanceOfWay(NWAY2) < shortestDistance)
 								shortestDistance = actNode.getDistanceOfWay(NWAY1)+actNode.getDistanceOfWay(NWAY2);	
 						}
 					}	
 				}
-				// Fall 1c: Knoten gehört nur zu NWAY1 => Rand vergrössern
+				// Fall 1c: Knoten gehï¿½rt nur zu NWAY1 => Rand vergrï¿½ssern
 				else {
 					enlargeBorder (border, actNode,stop, WAY1, threshold,shortestDistance,resPath);
 				}
 			}
-			// Fall 2: Knoten gehört nur zu NWAY2 => Rand vergrössern
+			// Fall 2: Knoten gehï¿½rt nur zu NWAY2 => Rand vergrï¿½ssern
 			else if (actNode.isMarked(WAY2)) {
 				enlargeBorder (border, actNode,start,WAY2, threshold,shortestDistance,resPath);
 			}
-			// Fall 3: Knoten gehört weder zu NWAY1 noch zu NWAY2 => Fehler
+			// Fall 3: Knoten gehï¿½rt weder zu NWAY1 noch zu NWAY2 => Fehler
 			else {
 				actNode.debugPrint(WAY1); actNode.debugPrint(WAY2); System.err.println(" ist falsch markiert!");
 			}	
 			elementFound = border.fetchFirst();
-			// wenn Knoten mehrfach kommt, ihn überspringen
+			// wenn Knoten mehrfach kommt, ihn ï¿½berspringen
 			while ( (elementFound) && (actNode.equals(border.returnNode())) ) {
 				elementFound = border.fetchFirst();
 			}
 		} // while
 	
-		// Prüfen, ob weiterer Durchlauf notwendig
+		// Prï¿½fen, ob weiterer Durchlauf notwendig
 		if (numOfLoops == 2)
 			break;
 		// Knotenmarkierungen neu setzen
@@ -296,23 +298,23 @@ public PathEdge computeFastWays (Node start, Node stop, int threshold) {
 		border.reset();
 	} // for
 	
-	// Markierungswerte zurücksetzen
+	// Markierungswerte zurï¿½cksetzen
 	WAY1 = NWAY1;
 	WAY2 = NWAY2;
 	FINAL = WAY2*2;
-	// Ergebnis zurückgeben
+	// Ergebnis zurï¿½ckgeben
 	return resPath;
 }
 /**
- * Berechnung der Verbindung zwischen zwei BEST-Knoten, die übergebenene Kante umfaßt.
+ * Berechnung der Verbindung zwischen zwei BEST-Knoten, die ï¿½bergebenene Kante umfaï¿½t.
  * Die Entfernung zum Zielknoten wird in den Rand-Elementen abgelegt.
- * @param border Rand gemäß Dijkstra als Heap
+ * @param border Rand gemï¿½ï¿½ Dijkstra als Heap
  * @param start Anfangsknoten von actEdge
  * @param actEdge aktuelle Kante
  * @param stop Zielknoten des Routings
  * @param wayMark Index des betrachteten Wegs (WAY1 oder WAY2)
- * @param threshold Prozentsatz, um den Wege länger sein dürfen als der kürzester Weg
- * @param shortestDistance Länge des kürzesten Weges
+ * @param threshold Prozentsatz, um den Wege lï¿½nger sein dï¿½rfen als der kï¿½rzester Weg
+ * @param shortestDistance Lï¿½nge des kï¿½rzesten Weges
  * @param resPath Ergebnispfad mit allen bislang berechneter Wege
  */
 protected void computeNewConnection (BorderHeap border, Node start, Edge actEdge, Node stop, int wayMark, int threshold, double shortestDistance, PathEdge resPath) {
@@ -323,7 +325,7 @@ protected void computeNewConnection (BorderHeap border, Node start, Edge actEdge
 		theOtherWay = NWAY2;
 	Node oppositeNode = actEdge.getOppositeNode (start);
 	boolean bothBest = oppositeNode.isMarked(BEST) && start.isMarked(BEST);
-	// Endpunkt der Verbindung feststellen und die Weglänge dahin berechnen
+	// Endpunkt der Verbindung feststellen und die Weglï¿½nge dahin berechnen
 	long addDistance = 0;
 	while (!oppositeNode.isMarked(BEST)) {
 		Edge nextEdge = oppositeNode.getWayEdge(way);
@@ -340,15 +342,15 @@ protected void computeNewConnection (BorderHeap border, Node start, Edge actEdge
 			break;
 		searchNode = searchNode.getWayEdge(way).getOppositeNode (searchNode);
 	}
-	// Falls beide zuvor BEST-Knoten, prüfen ob Verbindung in Resultat vorliegt
+	// Falls beide zuvor BEST-Knoten, prï¿½fen ob Verbindung in Resultat vorliegt
 	if (bothBest) {
 		bothBest = (resPath.findEdge (actEdge) != null);
 		if (!bothBest) {
-			System.out.print("bothBest: "); searchNode.debugPrint(way); System.out.print(" -> "); oppositeNode.debugPrint(way); System.out.print(" bislang nicht in Lösung."); System.out.println();
+			System.out.print("bothBest: "); searchNode.debugPrint(way); System.out.print(" -> "); oppositeNode.debugPrint(way); System.out.print(" bislang nicht in Lï¿½sung."); System.out.println();
 		}
 	}	
 
-	// Falls man über die Verbindung vorangekommen ist und den Schwellenwert nicht überschreitet: Pfad als Ergebnis aufnehmen
+	// Falls man ï¿½ber die Verbindung vorangekommen ist und den Schwellenwert nicht ï¿½berschreitet: Pfad als Ergebnis aufnehmen
 	if ( (searchNode.getDistanceOfWay(way) < oppositeNode.getDistanceOfWay(way)) &&
 		(!bothBest)) {
 		double actWeight = actEdge.getWeight();
@@ -367,7 +369,7 @@ protected void computeNewConnection (BorderHeap border, Node start, Edge actEdge
  * und diese mit BEST markiert.
  * @return berechneter Pfad
  * @param actNode Aufgangsknoten
- * @param way Index des gewünschten Weges
+ * @param way Index des gewï¿½nschten Weges
  * @param distOfOtherWay Distanz des anderen Weges bei actNode
  */
 protected PathEdge computeResultPath (Node actNode, int way, double distOfOtherWay) {
@@ -393,16 +395,15 @@ protected PathEdge computeResultPath (Node actNode, int way, double distOfOtherW
 }
 /**
  * Berechnung des Ergebnispfad von einem Knoten ausgehend.
- * Ggf. wird neben dem NWAY1-Weg auch der NWAY2-Weg hinzugefügt.
+ * Ggf. wird neben dem NWAY1-Weg auch der NWAY2-Weg hinzugefï¿½gt.
  * Dabei wird der Pfad jeweils in der Normalrichtung abgelaufen.
  * Die Distanzen des jeweils anderen Weges werden an den Pfadknoten gesetzt
  * und diese mit BEST markiert.
  * @return berechneter Pfad
  * @param firstNode Ausgangsknoten
- * @param computeWAY2 Soll auch der mit NWAY2-Weg berechnet werden?
  */
 protected PathEdge computeResultPath (Node firstNode, boolean computeNWAY2) {
-	// Fall, daß Knoten nicht gesetzt, abfangen
+	// Fall, daï¿½ Knoten nicht gesetzt, abfangen
 	if (firstNode == null)
 		return null;
 		
@@ -430,17 +431,17 @@ protected PathEdge computeResultPath (Node firstNode, boolean computeNWAY2) {
 			actNode = actEdge.getOppositeNode (actNode);
 		}
 	}
-	// Ggf. Ergebnis zurückgeben	
+	// Ggf. Ergebnis zurï¿½ckgeben	
 	if (!computeNWAY2) {
 		return path;
 	}
 		
 	// Berechnung NWAY2
-	// Fall berücksichtigen, daß es keine NWAY2-Kante gibt, 
+	// Fall berï¿½cksichtigen, daï¿½ es keine NWAY2-Kante gibt, 
 	if (firstNode.getWayEdge(NWAY2) == null) {
 		return path;
 	}
-	// In Abhängigkeit vom NWAY1-Weg Resultat verketten
+	// In Abhï¿½ngigkeit vom NWAY1-Weg Resultat verketten
 	PathEdge resPath = null;
 	Edge actEdge = firstNode.getWayEdge(NWAY2);
 	double actWeight = actEdge.getWeight(actEdge.isStartingFrom(firstNode));
@@ -475,8 +476,7 @@ protected PathEdge computeResultPath (Node firstNode, boolean computeNWAY2) {
  * Die Distanzen beider Wege werden an den Pfadknoten gesetzt
  * und diese mit BEST markiert.
  * @return berechneter Pfad
- * @param actNode Ausgangsknoten
- * @param way Index des gewünschten Weges
+ * @param way Index des gewï¿½nschten Weges
  */
 protected PathEdge computeResultPathBackwards (Node firstNode, int way) {
 	// Vorbereitungen
@@ -505,7 +505,7 @@ protected PathEdge computeResultPathBackwards (Node firstNode, int way) {
 	distOfOtherWay += actNode.getDistanceOfWay(theOtherWay);
 	while (!firstNode.equals(actNode)) {
 		firstNode.setDistanceOfWay(theOtherWay,distOfOtherWay);
-System.err.println("Ich glaube das nachfolgende ist falsch, da sich path nicht ändert");
+System.err.println("Ich glaube das nachfolgende ist falsch, da sich path nicht ï¿½ndert");
 		distOfOtherWay -= path.edge.getWeight();
 		firstNode = path.edge.getOppositeNode (firstNode);
 	}
@@ -514,11 +514,14 @@ System.err.println("Ich glaube das nachfolgende ist falsch, da sich path nicht ä
 }
 /**
  * Erzeugt Netzwerk aus Netzwerk-Dateien.
- * @param nodeIn DataInputStream für Knoten
- * @param edgeIn DataInputStream für Kanten
- * @param objects Container für drawable objects
+ * @param nodeIn DataInputStream fï¿½r Knoten
+ * @param edgeIn DataInputStream fï¿½r Kanten
+ * @param objects Container fï¿½r drawable objects
  */
 public void createByNetworkFiles (DataInputStream nodeIn, DataInputStream edgeIn, DrawableObjects objects) {
+	ArrayList<Node> nodeList = new  ArrayList<>();
+	ArrayList<Edge> edgeList = new ArrayList<>();
+
 	System.out.println("read nodes ...");
 	//DrawableObjectType nodeType = DrawableObjectType.getObjectType("Node");
 	Node actNode = null;
@@ -527,8 +530,9 @@ public void createByNetworkFiles (DataInputStream nodeIn, DataInputStream edgeIn
 			//DrawableObject obj = objects.newDrawableObject (actNode.getID(),nodeType,null,null);
 			//obj.addDrawable(actNode);
 			objects.addDrawable(actNode);
+			nodeList.add(actNode); //Todo: Makes sure that the nodes and edges in their structure is also in mine
 		}
-	}	
+	}
 	System.out.println("read edges ...");
 	//DrawableObjectType edgeType = DrawableObjectType.getObjectType("Edge");
 	Edge actEdge = null;
@@ -536,12 +540,27 @@ public void createByNetworkFiles (DataInputStream nodeIn, DataInputStream edgeIn
 	boolean eof = false;
 	while (!eof) {
 		try {
-			actEdge = edges.read(edgeIn,nodes);
+			actEdge = edges.read(edgeIn, nodes);
 			if (actEdge != null) {
 				if (objects != null) {
 					//DrawableObject obj = objects.newDrawableObject (actEdge.getID(),edgeType,actEdge.getName(),null);
 					//obj.addDrawable(actEdge);
-					objects.addDrawable(actEdge);
+					if (actEdge.getName().contains("Floor:")) {
+						Scanner s = new Scanner(actEdge.getName());
+						s.findInLine("Floor:");
+						if (s.hasNextShort()){
+							actEdge.setFloor(s.nextShort());
+							//When reading previous data, makes sure that the global floor number is correct
+							if (actEdge.getFloor() > Utility.getMaxNumOfFloors()-1) {
+								Utility.setMaxNumOfFloors(actEdge.getFloor()+1);
+							}
+						}
+					}
+					//Makes sure that we by default do not show dwelling and indoor edges, as well as buildings from another floor
+					if (actEdge.getEdgeClass() != 8 && actEdge.getEdgeClass() != 10 && actEdge.getFloor() == 0){
+						objects.addDrawable(actEdge);
+					}
+					edgeList.add(actEdge); //Todo: Makes sure that the nodes and edges in their structure is also in mine
 				}
 			}
 			else
@@ -551,13 +570,73 @@ public void createByNetworkFiles (DataInputStream nodeIn, DataInputStream edgeIn
 		catch (IOException ioe) {
 			eof = true;
 		}
-	}	
+	}
+	Utility.setAllEdges(edgeList); //Todo: Makes sure that the nodes and edges in their structure is also in mine
+	Utility.setAllNodes(nodeList);
 }
+	//TODO TESTING
+	public Network createByNetworkFiles2 (DataInputStream nodeIn, DataInputStream edgeIn, DrawableObjects objects) {
+		ArrayList<Node> nodeList = new  ArrayList<>();
+		ArrayList<Edge> edgeList = new ArrayList<>();
+
+		System.out.println("read nodes ...");
+		//DrawableObjectType nodeType = DrawableObjectType.getObjectType("Node");
+		Node actNode = null;
+		while ((actNode = nodes.read(nodeIn)) != null) {
+			if (objects != null) {
+				//DrawableObject obj = objects.newDrawableObject (actNode.getID(),nodeType,null,null);
+				//obj.addDrawable(actNode);
+				objects.addDrawable(actNode);
+				nodeList.add(actNode); //Todo: Makes sure that the nodes and edges in their structure is also in mine
+			}
+		}
+		System.out.println("read edges ...");
+		//DrawableObjectType edgeType = DrawableObjectType.getObjectType("Edge");
+		Edge actEdge = null;
+		int line = 1;
+		boolean eof = false;
+		while (!eof) {
+			try {
+				actEdge = edges.read(edgeIn, nodes);
+				if (actEdge != null) {
+					if (objects != null) {
+						//DrawableObject obj = objects.newDrawableObject (actEdge.getID(),edgeType,actEdge.getName(),null);
+						//obj.addDrawable(actEdge);
+						if (actEdge.getName().contains("Floor:")) {
+							Scanner s = new Scanner(actEdge.getName());
+							s.findInLine("Floor:");
+							if (s.hasNextShort()){
+								actEdge.setFloor(s.nextShort());
+								//When reading previous data, makes sure that the global floor number is correct
+								if (actEdge.getFloor() > Utility.getMaxNumOfFloors()-1) {
+									Utility.setMaxNumOfFloors(actEdge.getFloor()+1);
+								}
+							}
+						}
+						//Makes sure that we by default do not show dwelling and indoor edges, as well as buildings from another floor
+						if (actEdge.getEdgeClass() != 8 && actEdge.getEdgeClass() != 10 && actEdge.getFloor() == 0){
+							objects.addDrawable(actEdge);
+						}
+						edgeList.add(actEdge); //Todo: Makes sure that the nodes and edges in their structure is also in mine
+					}
+				}
+				else
+					System.err.println("Read error for edge on line "+line);
+				line++;
+			}
+			catch (IOException ioe) {
+				eof = true;
+			}
+		}
+		Utility.setAllEdges(edgeList); //Todo: Makes sure that the nodes and edges in their structure is also in mine
+		Utility.setAllNodes(nodeList);
+		return this;
+	}
 /**
  * Erzeugt Netzwerk aus Netzwerk-Dateien.
  * @return erfolgreich?
  * @param filename Basiname der Dateien
- * @param objects Container für drawable objects
+ * @param objects Container fï¿½r drawable objects
  */
 public boolean createByNetworkFiles (String filename, DrawableObjects objects) {
 	try {
@@ -575,7 +654,7 @@ public boolean createByNetworkFiles (String filename, DrawableObjects objects) {
  * Erzeugt Netzwerk aus Netzwerk-Dateien.
  * @param nodeURL URL der Knoten-Datei
  * @param edgeURL URL der Kanten-Datei
- * @param objects Container für drawable objects
+ * @param objects Container fï¿½r drawable objects
  */
 public void createByNetworkFiles (URL nodeURL, URL edgeURL, DrawableObjects objects) {
 	try {
@@ -603,24 +682,24 @@ public void createByNetworkFiles (URL nodeURL, URL edgeURL, DrawableObjects obje
 }
 /**
  * Erweiterung des Randes.
- * Diese Version der Methode unterstützt die Berechnung von Verbindungen,
- * für den Fall, daß die Erweiterung auf einen FINAL- oder BEST-Knoten trifft.
- * Die Entfernung zum Zielknoten wird grundsätzlich in den Rand-Elementen abgelegt.
- * @param border Rand gemäß Dijkstra als Heap
+ * Diese Version der Methode unterstï¿½tzt die Berechnung von Verbindungen,
+ * fï¿½r den Fall, daï¿½ die Erweiterung auf einen FINAL- oder BEST-Knoten trifft.
+ * Die Entfernung zum Zielknoten wird grundsï¿½tzlich in den Rand-Elementen abgelegt.
+ * @param border Rand gemï¿½ï¿½ Dijkstra als Heap
  * @param start aktueller Knoten
  * @param stop Zielknoten
  * @param wayMark Index des betrachteten Wegs (WAY1 oder WAY2)
- * @param threshold Prozentsatz, um den Wege länger sein dürfen als der kürzester Weg
- * @param shortestDistance Länge des kürzesten Weges
+ * @param threshold Prozentsatz, um den Wege lï¿½nger sein dï¿½rfen als der kï¿½rzester Weg
+ * @param shortestDistance Lï¿½nge des kï¿½rzesten Weges
  * @param resPath Ergebnispfad mit allen bislang berechneter Wege
  */
 protected void enlargeBorder (BorderHeap border, Node start, Node stop, int wayMark, int threshold, double shortestDistance, PathEdge resPath) {
 	// Vorbereitungen
 	int way = wayMark / WAY1;
-	// über alle Kanten des aktuellen Knotens iterieren
+	// ï¿½ber alle Kanten des aktuellen Knotens iterieren
 	Edge actEdge = start.getFirstEdge();
 	while (actEdge != null) {
-		// Ausschließen, daß Zurückgelaufen wird
+		// Ausschlieï¿½en, daï¿½ Zurï¿½ckgelaufen wird
 		if (actEdge != start.getWayEdge(way)) {
 			Node oppositeNode = actEdge.getOppositeNode(start);
 			boolean newInBorder = (!oppositeNode.isMarked(wayMark));
@@ -640,10 +719,10 @@ protected void enlargeBorder (BorderHeap border, Node start, Node stop, int wayM
 					//System.out.print("neu im Heap: "); element.debugPrint(); System.out.println();
 					border.insert (oppositeNode,way,edges.getWeightManager().computeWeight (oppositeNode.distanceTo(stop)));
 				}
-				// oder Gewicht anpassen (bei akt. Heap-Implementierung ist dazu nichts nötig)
+				// oder Gewicht anpassen (bei akt. Heap-Implementierung ist dazu nichts nï¿½tig)
 				else {
-					//System.out.print("geändert im Heap: "); oppositeNode.debugPrint(way); System.out.println();
-					// Prüfen, ob über alten Weg neue Verbindung anlegbar ist
+					//System.out.print("geï¿½ndert im Heap: "); oppositeNode.debugPrint(way); System.out.println();
+					// Prï¿½fen, ob ï¿½ber alten Weg neue Verbindung anlegbar ist
 					if (oppositeNode.isMarked(BEST)) {
 						Edge oldEdge = oppositeNode.getWayEdge(way);
 						computeNewConnection (border, oldEdge.getOppositeNode(oppositeNode),oldEdge,stop, wayMark, threshold,shortestDistance, resPath);
@@ -652,7 +731,7 @@ protected void enlargeBorder (BorderHeap border, Node start, Node stop, int wayM
 				}	
 			}
 			
-			// ansonsten, Prüfen, ob eine neue Verbindung anlegbar ist
+			// ansonsten, Prï¿½fen, ob eine neue Verbindung anlegbar ist
 			else if ((resPath!=null) && (oppositeNode.isMarked(BEST) || oppositeNode.isMarked(FINAL)) && (!start.isMarked(BEST) || (oppositeNode.isMarked(BEST) && start.getDistanceOfWay(way) < oppositeNode.getDistanceOfWay(way))) )
 				computeNewConnection (border, start,actEdge,stop, wayMark, threshold,shortestDistance, resPath);
 		}	// if 		
@@ -661,11 +740,11 @@ protected void enlargeBorder (BorderHeap border, Node start, Node stop, int wayM
 }
 /**
  * (Standard-)Erweiterung des Randes.
- * @param border Rand gemäß Dijkstra als Heap
+ * @param border Rand gemï¿½ï¿½ Dijkstra als Heap
  * @param start Startknoten
  * @param stop Zielknoten
  * @param way betrachteter Weg
- * @param considerDistToDest Soll die Entfernung zum Zielknoten berücksichtigt werden?
+ * @param considerDistToDest Soll die Entfernung zum Zielknoten berï¿½cksichtigt werden?
  */
 protected void enlargeBorder (BorderHeap border, Node start, Node stop, int way, boolean considerDistToDest) {
 	Edge actEdge = start.getFirstEdge();
@@ -695,7 +774,7 @@ protected void enlargeBorder (BorderHeap border, Node start, Node stop, int way,
 					oppositeNode.setDistanceOfWay (way,start.getDistanceOfWay(way)+actWeight);
 					oppositeNode.setWay (way,actEdge);
 					border.adaptToDecreasedDistance(oppositeNode,way);
-					//System.out.print("geändert im Heap: "); oppositeNode.debugPrint(way); System.out.println();
+					//System.out.print("geï¿½ndert im Heap: "); oppositeNode.debugPrint(way); System.out.println();
 				}	
 			}
 		}	
@@ -703,14 +782,14 @@ protected void enlargeBorder (BorderHeap border, Node start, Node stop, int way,
 	}
 }
 /**
- * Gibt Kanten-Container zurück.
+ * Gibt Kanten-Container zurï¿½ck.
  * @return Kanten-Container
  */
 public Edges getEdges() {
 	return edges;
 }
 /**
- * Gibt Knoten-Container zurück.
+ * Gibt Knoten-Container zurï¿½ck.
  * @return Knoten-Container
  */
 public Nodes getNodes() {
@@ -721,23 +800,35 @@ public Nodes getNodes() {
  * @param filename path and basic name of the files
  */
 public void save (String filename) {
-	// write nodes
+
 	try {
+	    // write nodes
 		System.out.println("write nodes ...");
 		FileOutputStream out = new FileOutputStream (filename+".node");
 		DataOutputStream dOut = new DataOutputStream (out);
-		for (Enumeration e = nodes.elements(); e.hasMoreElements();)
-			((Node)e.nextElement()).write (dOut);
+		BufferedWriter nodeWriter = new BufferedWriter(new FileWriter(filename + ".nodedat"));
+		for (Enumeration e = nodes.elements(); e.hasMoreElements();){
+			Node node = (Node)e.nextElement();
+			node.write (dOut);
+			node.writeNode(nodeWriter);
+		}
 		dOut.close();
 		out.close();
+		nodeWriter.close();
+
 		// write edges
 		System.out.println("write edges ...");
 		out = new FileOutputStream (filename+".edge");
 		dOut = new DataOutputStream (out);
-		for (Enumeration e = edges.elements(); e.hasMoreElements();)
-			((Edge)e.nextElement()).write (dOut);
+        BufferedWriter edgeWriter = new BufferedWriter(new FileWriter(filename + ".edgedat"));
+        for (Enumeration e = edges.elements(); e.hasMoreElements();){
+            Edge edge = (Edge)e.nextElement();
+            edge.write (dOut);
+            edge.writeEdge(edgeWriter);
+        }
 		dOut.close();
 		out.close();
+		edgeWriter.close();
 	}
 	catch (IOException ioe) {
 		System.err.println("Network.save: I/O-Error" + ioe.getMessage());
@@ -770,4 +861,12 @@ public void saveAsText (String filename) {
 		System.err.println("Network.saveAsText: I/O-Error" + ioe.getMessage());
 	}
 }
+
+	public void setNodes(Nodes nodes) {
+		this.nodes = nodes;
+	}
+
+	public void setEdges(Edges edges) {
+		this.edges = edges;
+	}
 }

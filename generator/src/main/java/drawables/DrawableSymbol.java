@@ -77,7 +77,23 @@ public DrawableSymbol (int px, int py, String presName) {
 	y = py;
 	mbr = new Rectangle (x-1,y-1,3,3);
 	pres = DrawablePresentation.get(presName);
+/*	pres.inside = false;
+	pres.floor = 0;*/
 }
+
+	/**
+	 * Constructor with floors for moving object drawables
+	 */
+	public DrawableSymbol (int px, int py, String presName, int floor) {
+		this();
+		x = px;
+		y = py;
+		mbr = new Rectangle (x-1,y-1,3,3);
+		pres = DrawablePresentation.get(presName);
+		/*pres.inside = true;
+		pres.floor = floor;*/
+	}
+
 /**
  * Konstruktor für Symbol.
  * @param px x-Koordinate

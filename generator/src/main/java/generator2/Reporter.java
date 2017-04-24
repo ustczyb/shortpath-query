@@ -1,9 +1,17 @@
 package generator2;
 
 import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.*;
 
 import drawables.*;
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.ParsingException;
+import util.Utility;
 
 /**
  * Abstract class for reporting the computed moving objects.
@@ -215,9 +223,37 @@ public int reportMovingObject (int time, long id, int repNum, int objClass, doub
 	numOfPoints++;
 	repNum++;
 	if (visualize && (objects != null))
-		visualizeMovingObject ((int)x,(int)y,objClass,time);
+		visualizeMovingObject((int) x, (int) y, objClass, time);
 	return repNum;
 }
+
+	/**
+	 * Reports the characteristic properties of a moving object at a time stamp
+	 * according to its report probability.
+	 * @return  new report number
+	 * @param  time  time stamp
+	 * @param  id  object id
+	 * @param  repNum  report number
+	 * @param  objClass  object class
+	 * @param  x  x-coordinate
+	 * @param  y  y-coordinate
+	 * @param  speed  current speed
+	 * @param  doneDist  the distance since the last reporting
+	 * @param  nextNodeX  x-coordinate of the next node
+	 * @param  nextNodeY  y-coordinate of the next node
+	 * @param  reportProbability  value between (0..1000)
+	 */
+	public int reportInsideMovingObject (int time, long id, int repNum, int objClass, double x, double y, double speed, double doneDist, int nextNodeX, int nextNodeY, int reportProbability, int floor) {
+		if (reportProbability == 0)
+			return repNum;
+		if (Math.abs(random.nextInt())%1000 >= reportProbability)
+			return repNum;
+		numOfPoints++;
+		repNum++;
+		if (visualize && (objects != null))
+			visualizeIndoorMovingObject((int) x, (int) y, objClass, time, floor);
+		return repNum;
+	}
 
 /**
  * Reports a new external object.
@@ -228,7 +264,7 @@ public int reportMovingObject (int time, long id, int repNum, int objClass, doub
  */
 public void reportNewExternalObject (int time, long id, int objClass, Rectangle rect) {
 	if (visualize && (objects != null))
-		visualizeExternalObject (rect,objClass,time);
+		visualizeExternalObject(rect, objClass, time);
 }
 
 /**
@@ -274,9 +310,22 @@ protected void visualizeExternalObject (Rectangle rect, int objClass, int time) 
  * @param time time stamp
  */
 protected void visualizeMovingObject (int x, int y, int objClass, int time) {
+	/*
 	DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+objClass+"-"+time);
 	symbol.setLayer(SYMBOLLAYER);
-	objects.addDrawable(symbol);
+	objects.addDrawable(symbol);*/
 }
 
+	/**
+	 * Visualizes a moving object located inside a building.
+	 * @param x x
+	 * @param y x
+	 * @param objClass object class
+	 * @param time time stamp
+	 */
+	protected void visualizeIndoorMovingObject (int x, int y, int objClass, int time, int floor) {
+/*		DrawableSymbol symbol = new DrawableSymbol (x,y,"Point"+objClass+"-"+time, floor);
+		symbol.setLayer(SYMBOLLAYER);
+		objects.addDrawable(symbol);*/
+	}
 }

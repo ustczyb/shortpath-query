@@ -34,11 +34,11 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	 */
 	protected static final int STARTED = 2;
 	/**
-	 * Status "aktiv: gestarted und bereit fï¿½r Interaktion".
+	 * Status "aktiv: gestarted und bereit für Interaktion".
 	 */
 	protected static final int ACTIVE = 3;
 	/**
-	 * Status "vollstï¿½ndig geladen".
+	 * Status "vollständig geladen".
 	 */
 	protected static final int COMPLETE = 4;
 
@@ -56,49 +56,49 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	 */
 	protected CPUTimer updateTimer = new CPUTimer();
 	/**
-	 * Wartezeit fï¿½r nï¿½chsten Update in Millisekunden.
+	 * Wartezeit für nächsten Update in Millisekunden.
 	 */
 	protected static final long UPDATETIME = 3000;
 
 	/**
 	 * Anzahl der Layer.
 	 */
- 	protected int numOfLayers = 5;
+ 	protected int numOfLayers = 9;
 	/**
-	 * Container ï¿½ber Drawable-Objekte.
+	 * Container über Drawable-Objekte.
 	 */
  	protected DrawableObjects drawableObjects = null;
 
  	/**
-	 * Faktor des Basis-Maï¿½stabs (gibt an, mit welchen Faktor der Maï¿½stab zu multiplizieren ist, um die eigentliche Maï¿½stabszahl zu erhalten).
+	 * Faktor des Basis-Maßstabs (gibt an, mit welchen Faktor der Maßstab zu multiplizieren ist, um die eigentliche Maßstabszahl zu erhalten).
 	 */
  	protected int baseScaleFactor = 1000000;
 	/**
-	 * Breite der Gesamtkarte im Basis-Maï¿½stab 1 in Pixel.
+	 * Breite der Gesamtkarte im Basis-Maßstab 1 in Pixel.
 	 */
 	protected int mapWidth = 300;
 	/**
-	 * Hï¿½he der Gesamtkarte im Basis-Maï¿½stab 1 in Pixel.
+	 * Höhe der Gesamtkarte im Basis-Maßstab 1 in Pixel.
 	 */
 	protected int mapHeight = 300;
 	/**
-	 * x-Koordinate des Mittelpunkts des akt. angezeigten Kartenausschnitts im akt. Maï¿½stab.
+	 * x-Koordinate des Mittelpunkts des akt. angezeigten Kartenausschnitts im akt. Maßstab.
 	 */
 	protected int viewMapX = 150;
 	/**
-	 * y-Koordinate des Mittelpunkts des akt. angezeigten Kartenausschnitts im akt. Maï¿½stab.
+	 * y-Koordinate des Mittelpunkts des akt. angezeigten Kartenausschnitts im akt. Maßstab.
 	 */
 	protected int viewMapY = 150;
 	/**
-	 * detailiertester Maï¿½stab (in Maï¿½stabseinheiten).
+	 * detailiertester Maßstab (in Maßstabseinheiten).
 	 */
 	protected int maxScale = 1;
 	/**
-	 * grï¿½bster Maï¿½stab (in Maï¿½stabseinheiten).
+	 * gröbster Maßstab (in Maßstabseinheiten).
 	 */
 	protected int minScale = 320;
 	/**
-	 * aktueller Maï¿½stab (in Maï¿½stabseinheiten).
+	 * aktueller Maßstab (in Maßstabseinheiten).
 	 */
 	protected int scale = 160;
 	/**
@@ -106,7 +106,7 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	 */
 	protected int viewWidth = 300;
 	/**
-	 * Hï¿½he der Kartenanzeige (in Pixel).
+	 * Höhe der Kartenanzeige (in Pixel).
 	 */
 	protected int viewHeight = 300;
 	/**
@@ -120,12 +120,12 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	/**
 	 * Obere Position des Ein-/Ausgabebereichs (in Pixel).
 	 * Belegung mit negativen Wert bewirkt,
-	 * daï¿½ der Ausgabebereich oberhalb der Karte dargestellt wird.
+	 * daß der Ausgabebereich oberhalb der Karte dargestellt wird.
 	 * Ansonsten wird er unterhalb der Karte dargestellt.
 	 */
 	protected int panelY = 1;
 	/**
-	 * Hï¿½he des Ein-/Ausgabebereichs (in Pixel).
+	 * Höhe des Ein-/Ausgabebereichs (in Pixel).
 	 */
 	protected int panelHeight = 163;
 	/**
@@ -137,11 +137,11 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	 */
 	protected Color mapColor = new Color(120,255,255);
 	/**
-	 * Wird der Wechsel auf Unicode-Darstellung unterstï¿½tzt?
+	 * Wird der Wechsel auf Unicode-Darstellung unterstützt?
 	 */
 	protected boolean unicodeSupported = false;
 	/**
-	 * gewï¿½hlte Sprache
+	 * gewählte Sprache
 	 */
 	protected int language = ENGLISH;
 
@@ -150,7 +150,7 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
 	 */
 	protected int state = STARTING;
 	/**
-	 * Image fï¿½r Double-Buffering.
+	 * Image für Double-Buffering.
 	 */
 	private Image doubleBuffer = null;
 	/**
@@ -203,7 +203,7 @@ public abstract class ShowMap extends Applet implements ActionListener, ItemList
  * Event handling for the ActionListener interface.
  * @param e the event
  */
-public void actionPerformed (ActionEvent e) {
+public void actionPerformed (java.awt.event.ActionEvent e) {
 	if (e.getSource() == getZoomInButton())
 		zoomIn();
 	if (e.getSource() == getZoomOutButton())
@@ -282,10 +282,10 @@ public void changeComponentPositions () {
 	}
 }
 /**
- * Prï¿½ft, ob der Anzeige-Mittelpunkt (viewMapX,viewMapY) im zulï¿½ssigen
- * Bereich liegt. Falls nicht, wird er korrigiert. Auï¿½erdem werden die
+ * Prüft, ob der Anzeige-Mittelpunkt (viewMapX,viewMapY) im zulässigen
+ * Bereich liegt. Falls nicht, wird er korrigiert. Außerdem werden die
  * Navigations-/Zoom-Buttons deselektiert, falls keine Navigation/kein Zooming
- * mehr in betroffene Richtung / Maï¿½stab mï¿½glich ist bzw.
+ * mehr in betroffene Richtung / Maßstab möglich ist bzw.
  * wenn der Applet-Status noch nicht "aktiv" ist.
  */
 protected void checkViewPoint () {
@@ -342,17 +342,17 @@ protected URL computeURL (String name) {
 	}
 }
 /**
- * Deselektiert das bisher darstellte Objekt und selektiert das ï¿½bergebene Objekt.
- * Falls null ï¿½bergeben wird, wird die Anzeige zurï¿½ckgesetzt.
- * Die abgeleiteten Klassen mï¿½ssen dafï¿½r sorgen,
- * daï¿½ die Anzeige der Attribute des ï¿½bergebenen Objekts im Applet angezeigt.
+ * Deselektiert das bisher darstellte Objekt und selektiert das übergebene Objekt.
+ * Falls null übergeben wird, wird die Anzeige zurückgesetzt.
+ * Die abgeleiteten Klassen müssen dafür sorgen,
+ * daß die Anzeige der Attribute des übergebenen Objekts im Applet angezeigt.
  * @param obj Objekt
  */
 protected void depictObjectAttributes (DrawableObject obj) {
 	// Bisheriges Objekt deselektieren
 	//DrawableObject oldSelectedObject = drawableObjects.getSelectedObject();
 	drawableObjects.deselect();
-	// Falls obj == null, Anzeige lï¿½schen & fertig
+	// Falls obj == null, Anzeige löschen & fertig
 	if (obj == null) {
 		getNameLabel().setText("...");
 		getTagLabel().setText("...");
@@ -382,7 +382,7 @@ protected void drawMap (Graphics g, Rectangle r, int scale) {
  * @param selectable nur selektierbare Objekte suchen?
  */
 protected DrawableObject findObject (int mx, int my, boolean selectable) {
-	// Fall: Maus auï¿½erhalb der Karte -> Resultat: null
+	// Fall: Maus außerhalb der Karte -> Resultat: null
 	if ((mx < viewX) || (mx > viewX+viewWidth) || (my < viewY) || (my > viewY+viewHeight))
 		return null;
 	// Symbol suchen
@@ -400,7 +400,7 @@ public String getAppletInfo() {
 	return "Applet ShowMap, Version 2.40\n" + getCopyrightLabel().getText();
 }
 /**
- * Anlegen / Zurï¿½ckgeben des ClickInfo-Labels.
+ * Anlegen / Zurückgeben des ClickInfo-Labels.
  * @return ClickInfo-Label
  */
 protected Label getClickInfoLabel() {
@@ -416,7 +416,7 @@ protected Label getClickInfoLabel() {
 	return ivjClickInfoLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des Copyright-Labels.
+ * Anlegen / Zurückgeben des Copyright-Labels.
  * @return Copyright-Label
  */
 protected Label getCopyrightLabel() {
@@ -429,7 +429,7 @@ protected Label getCopyrightLabel() {
 	return ivjCopyrightLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des East-Buttons.
+ * Anlegen / Zurückgeben des East-Buttons.
  * @return East-Button
  */
 protected Button getEastButton() {
@@ -445,8 +445,8 @@ protected Button getEastButton() {
 	return ivjEastButton;
 }
 /**
- * Gibt die ID des selektierten Objekts zurï¿½ck.
- * Falls kein Objekt selektiert ist, wird -1 zurï¿½ckgegeben.
+ * Gibt die ID des selektierten Objekts zurück.
+ * Falls kein Objekt selektiert ist, wird -1 zurückgegeben.
  * @return ID des selektierten Objekts
  */
 public long getIdOfSelectedObject () {
@@ -457,8 +457,8 @@ public long getIdOfSelectedObject () {
 		return -1;
 }
 /**
- * Gibt die ID des selektierten Objekts als String zurï¿½ck.
- * Falls kein Objekt selektiert ist, wird einee leere Zeichenkette zurï¿½ckgegeben.
+ * Gibt die ID des selektierten Objekts als String zurück.
+ * Falls kein Objekt selektiert ist, wird einee leere Zeichenkette zurückgegeben.
  * @return ID des selektierten Objekz
  */
 public String getIdOfSelectedObjectAsString () {
@@ -469,14 +469,14 @@ public String getIdOfSelectedObjectAsString () {
 		return "";
 }
 /**
- * Gibt den Info-Text zu einem Objekt zurï¿½ck.
- * Die Rï¿½ckgabe von null ist zulï¿½ssig.
+ * Gibt den Info-Text zu einem Objekt zurück.
+ * Die Rückgabe von null ist zulässig.
  * @return Info-Text
  * @param obj Objekt
  */
 protected abstract String getInfoText (DrawableObject obj);
 /**
- * Anlegen / Zurï¿½ckgeben des Name-Labels.
+ * Anlegen / Zurückgeben des Name-Labels.
  * @return Name-Label
  */
 protected Label getNameLabel() {
@@ -500,7 +500,7 @@ public String getNameOfSelectedObject () {
 		return "";
 }
 /**
- * Anlegen / Zurï¿½ckgeben des North-Buttons.
+ * Anlegen / Zurückgeben des North-Buttons.
  * @return East-Button
  */
 protected Button getNorthButton() {
@@ -513,17 +513,17 @@ protected Button getNorthButton() {
 	return ivjNorthButton;
 }
 /**
- * Gibt Informationen ï¿½ber die unterstï¿½tzten Parameter zurï¿½ck.
+ * Gibt Informationen über die unterstützten Parameter zurück.
  * @return Parameter-Info in String-Array.
  */
-public String[][] getParameterInfo() {
+public java.lang.String[][] getParameterInfo() {
 	String[][] info = {
 		{"name of parameter", "type of parameter", "see: ShowMapParameters.html"},
 	};
 	return info;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des PressInfo-Labels.
+ * Anlegen / Zurückgeben des PressInfo-Labels.
  * @return PressInfo-Label
  */
 protected Label getPressInfoLabel() {
@@ -532,14 +532,14 @@ protected Label getPressInfoLabel() {
 		ivjPressInfoLabel.setName("PressInfo");
 		ivjPressInfoLabel.setFont(new Font("dialog", 0, 10));
 		if (language == GERMAN)
-			ivjPressInfoLabel.setText("Aufziehen: Neue Mitte & Grï¿½ï¿½er");
+			ivjPressInfoLabel.setText("Aufziehen: Neue Mitte & Größer");
 		else
 			ivjPressInfoLabel.setText("drag: new center & zoom in");
 	};
 	return ivjPressInfoLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des Scale-Labels.
+ * Anlegen / Zurückgeben des Scale-Labels.
  * @return Scale-Label
  */
 protected Label getScaleLabel() {
@@ -553,7 +553,7 @@ protected Label getScaleLabel() {
 	return ivjScaleLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des ShiftClickInfo-Labels.
+ * Anlegen / Zurückgeben des ShiftClickInfo-Labels.
  * @return ShiftClickInfo-Label
  */
 protected Label getShiftClickInfoLabel() {
@@ -569,7 +569,7 @@ protected Label getShiftClickInfoLabel() {
 	return ivjShiftClickInfoLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des South-Buttons.
+ * Anlegen / Zurückgeben des South-Buttons.
  * @return South-Button
  */
 protected Button getSouthButton() {
@@ -581,14 +581,14 @@ protected Button getSouthButton() {
 	return ivjSouthButton;
 }
 /**
- * Gibt Applet-Status zurï¿½ck.
+ * Gibt Applet-Status zurück.
  * @return Status
  */
 protected int getState () {
 	return state;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des Tag-Labels.
+ * Anlegen / Zurückgeben des Tag-Labels.
  * @return Tag-Label
  */
 protected Label getTagLabel() {
@@ -601,7 +601,7 @@ protected Label getTagLabel() {
 	return ivjTagLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben der Unicode-Checkbox.
+ * Anlegen / Zurückgeben der Unicode-Checkbox.
  * @return Unicode-Checkbox
  */
 protected Checkbox getUnicodeCheckbox() {
@@ -615,7 +615,7 @@ protected Checkbox getUnicodeCheckbox() {
 	return ivjUnicodeCheckbox;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des Value-Labels.
+ * Anlegen / Zurückgeben des Value-Labels.
  * @return Value-Label
  */
 protected Label getValueLabel() {
@@ -628,7 +628,7 @@ protected Label getValueLabel() {
 	return ivjValueLabel;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des West-Buttons.
+ * Anlegen / Zurückgeben des West-Buttons.
  * @return West-Button
  */
 protected Button getWestButton() {
@@ -641,7 +641,7 @@ protected Button getWestButton() {
 	return ivjWestButton;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des ZoomIn-Buttons.
+ * Anlegen / Zurückgeben des ZoomIn-Buttons.
  * @return ZoomIn-Button
  */
 protected Button getZoomInButton() {
@@ -649,14 +649,14 @@ protected Button getZoomInButton() {
 		ivjZoomInButton = new Button();
 		ivjZoomInButton.setName("ZoomInButton");
 		if (language == GERMAN)
-			ivjZoomInButton.setLabel("Grï¿½ï¿½er");
+			ivjZoomInButton.setLabel("Größer");
 		else
 			ivjZoomInButton.setLabel("Zoom In");
 	};
 	return ivjZoomInButton;
 }
 /**
- * Anlegen / Zurï¿½ckgeben des ZoomOut-Buttons.
+ * Anlegen / Zurückgeben des ZoomOut-Buttons.
  * @return ZoomOut-Button
  */
 protected Button getZoomOutButton() {
@@ -676,9 +676,9 @@ protected Button getZoomOutButton() {
 public void init() {
 	super.init();
 	setName("ShowMap");
-	// ï¿½bergebene Parameter auswerten
+	// übergebene Parameter auswerten
 	interpretParameters();
-	// Oberflï¿½chenelemente hinzufï¿½gen
+	// Oberflächenelemente hinzufügen
 	setLayout(null);
 	setBackground (backgroundColor);
 	setSize (2*viewX+viewWidth, viewY+viewHeight+panelHeight);
@@ -760,29 +760,29 @@ protected void interpretParameters () {
 		language = GERMAN;
 }
 /**
- * Methode zur Behandlung von StateChanged-Events fï¿½r das ItemListener-Interface.
+ * Methode zur Behandlung von StateChanged-Events für das ItemListener-Interface.
  * @param e akt. Event
  */
-public void itemStateChanged (ItemEvent e) {
+public void itemStateChanged (java.awt.event.ItemEvent e) {
 	if ((e.getSource() == getUnicodeCheckbox()) ) {
 		if (unicodeSupported)
 			setUnicode(getUnicodeCheckbox().getState());
 	}
 }
 /**
- * Die Methode wird aufgerufen, falls evtl. Daten nach ï¿½nderung des Kartenausschnitts
- * oder ï¿½hnlichen Ereignissen geladen werden mï¿½ssen.
- * Standardmï¿½ï¿½ig passiert nichts.
+ * Die Methode wird aufgerufen, falls evtl. Daten nach Änderung des Kartenausschnitts
+ * oder ähnlichen Ereignissen geladen werden müssen.
+ * Standardmäßig passiert nichts.
  */
 protected void loadDrawables () {
 }
 /**
- * Methode zur Behandlung vom mouseClicked-Event fï¿½r das MouseListener-Interface.
+ * Methode zur Behandlung vom mouseClicked-Event für das MouseListener-Interface.
  * @param e akt. Event
  */
-public void mouseClicked (MouseEvent e) {
+public void mouseClicked (java.awt.event.MouseEvent e) {
 	if ((e.getSource() == this) ) {
-		// Falls Shift-Taste gedrï¿½ckt, Position anpassen
+		// Falls Shift-Taste gedrückt, Position anpassen
 		if (e.isShiftDown())
 			movePos (e.getX(), e.getY());
 		// Sonst: Objekt suchen und ggf. anzeigen
@@ -795,31 +795,31 @@ public void mouseClicked (MouseEvent e) {
 	}
 }
 /**
- * Methode zur Behandlung vom mouseDragged-Event fï¿½r das MouseMotionerListener-Interface.
+ * Methode zur Behandlung vom mouseDragged-Event für das MouseMotionerListener-Interface.
  * @param e akt. Event
  */
 public void mouseDragged (MouseEvent e) {
 	if ((e.getSource() == this) ) {
-		paintDragBox (lastMouseXPos, lastMouseYPos, lastDragXPos,lastDragYPos);	// alte Box lï¿½schen
+		paintDragBox (lastMouseXPos, lastMouseYPos, lastDragXPos,lastDragYPos);	// alte Box löschen
 		lastDragXPos = e.getX();
 		lastDragYPos = e.getY();
 		paintDragBox (lastMouseXPos, lastMouseYPos, lastDragXPos,lastDragYPos);	// neue Box zeichnen
 	}
 }
 /**
- * Methode zur Behandlung vom mouseEntered-Event fï¿½r das MouseListener-Interface.
+ * Methode zur Behandlung vom mouseEntered-Event für das MouseListener-Interface.
  * @param e akt. Event
  */
-public void mouseEntered (MouseEvent e) {
+public void mouseEntered (java.awt.event.MouseEvent e) {
 }
 /**
- * Methode zur Behandlung vom mouseExited-Event fï¿½r das MouseListener-Interface.
+ * Methode zur Behandlung vom mouseExited-Event für das MouseListener-Interface.
  * @param e akt. Event
  */
-public void mouseExited (MouseEvent e) {
+public void mouseExited (java.awt.event.MouseEvent e) {
 }
 /**
- * Methode zur Behandlung vom mouseMoved-Event fï¿½r das MouseMotionerListener-Interface.
+ * Methode zur Behandlung vom mouseMoved-Event für das MouseMotionerListener-Interface.
  * @param e akt. Event
  */
 public void mouseMoved (MouseEvent e) {
@@ -840,7 +840,7 @@ public void mouseMoved (MouseEvent e) {
 	}
 }
 /**
- * Methode zur Behandlung vom mousePressed-Event fï¿½r das MouseListener-Interface.
+ * Methode zur Behandlung vom mousePressed-Event für das MouseListener-Interface.
  * @param e akt. Event
  */
 public void mousePressed (MouseEvent e) {
@@ -853,12 +853,12 @@ public void mousePressed (MouseEvent e) {
 	}
 }
 /**
- * Methode zur Behandlung vom mouseReleased-Event fï¿½r das MouseListener-Interface.
+ * Methode zur Behandlung vom mouseReleased-Event für das MouseListener-Interface.
  * @param e akt. Event
  */
-public void mouseReleased (MouseEvent e) {
+public void mouseReleased (java.awt.event.MouseEvent e) {
 	if ((e.getSource() == this) ) {
-		// DragBox lï¿½schen
+		// DragBox löschen
 		paintDragBox (lastMouseXPos, lastMouseYPos, lastDragXPos,lastDragYPos);
 		// Falls die Maus sich hinreichend bewegt hat und Applet aktiv, Zoom und Move
 		if ( ((Math.abs(lastMouseXPos-e.getX()) > 3) || (Math.abs(lastMouseYPos-e.getY()) > 3)) &&
@@ -918,10 +918,10 @@ public void movePos (int x, int y) {
 }
 /**
  * Verschiebt Mittelpunkt des Kartenausschnitts auf (x,y) und
- * setzt Maï¿½stab auf den kleinsten Maï¿½stab, der grï¿½ï¿½ergleich s ist.
+ * setzt Maßstab auf den kleinsten Maßstab, der größergleich s ist.
  * @param x x-Koordinate in Welt-Koordinaten
  * @param y y-Koordinate in Welt-Koordinaten
- * @param s Maï¿½stab
+ * @param s Maßstab
  */
 public void movePos (int x, int y, int s) {
 	scale = minScale;
@@ -938,8 +938,8 @@ public void movePos (int x, int y, int s) {
 	loadDrawables();
 }
 /**
- * Setzt des Kartenausschnitt so, daï¿½ sich das Symbol mit der ï¿½bergebenen ID
- * in der Ausschnittsmitte befindet. Auï¿½erdem werden die Attribute des Symbols
+ * Setzt des Kartenausschnitt so, daß sich das Symbol mit der übergebenen ID
+ * in der Ausschnittsmitte befindet. Außerdem werden die Attribute des Symbols
  * dargestellt und das Symbol selektiert.
  * @param id ID des Symbols
  */
@@ -964,7 +964,7 @@ public void movePos (long id) {
 	loadDrawables();
 }
 /**
- * Kartenausschnitt nach Sï¿½den verschieben.
+ * Kartenausschnitt nach Süden verschieben.
  */
 public void moveSouth () {
 	int oldViewMapY = viewMapY;
@@ -999,7 +999,7 @@ public void paint (Graphics g) {
 		g.drawImage (doubleBuffer, viewX,viewY, this);
 }
 /**
- * Zeichnet die Drag-Box, falls sie hinreichend groï¿½ ist.
+ * Zeichnet die Drag-Box, falls sie hinreichend groß ist.
  * @param x1 x-Koordinate 1
  * @param y1 y-Koordinate 1
  * @param x2 x-Koordinate 2
@@ -1016,7 +1016,7 @@ protected void paintDragBox (int x1, int y1, int x2, int y2) {
 	}
 }
 /**
- * Stellt einen Info-Text zum ï¿½bergebenen Objekt dar.
+ * Stellt einen Info-Text zum übergebenen Objekt dar.
  * @param x x-Position
  * @param y y-Position
  * @param symb Symbol
@@ -1049,10 +1049,10 @@ protected void paintInfo (int x, int y, DrawableObject obj) {
 protected int readDrawables (int objNum, URL url, int index) {
 	try {
 		if (language == GERMAN)
-			showStatus("ï¿½ffne URL ...");
+			showStatus("öffne URL ...");
 		else
 			showStatus("open URL ...");
-		// Stream ï¿½ffnen
+		// Stream öffnen
 		InputStream is = null;
 		EntryInput ber;
 		if (url.toString().endsWith(".zip")) {
@@ -1168,9 +1168,9 @@ protected int readDrawables (int objNum, EntryInput ber) {
 	return objNum;
 }
 /**
- * ï¿½ndert die Grï¿½ï¿½e der Karte und des Applets.
+ * Ändert die Größe der Karte und des Applets.
  * @param pViewWidth Breite der Kartenanzeige
- * @param pViewHeight Hï¿½he der Kartenanzeige
+ * @param pViewHeight Höhe der Kartenanzeige
  */
 public void setMapSize (int pViewWidth, int pViewHeight ) {
 	viewWidth = pViewWidth;
@@ -1193,7 +1193,7 @@ protected void setState (int state) {
 			showStatus ("Ready!");
 }
 /**
- * Stellt die Text-Ausgabe in Abhï¿½ngigkeit vom Parameter auf Unicode oder ANSI.
+ * Stellt die Text-Ausgabe in Abhängigkeit vom Parameter auf Unicode oder ANSI.
  * @param f Unicode?
  */
 protected void setUnicode (boolean f) {
@@ -1242,7 +1242,7 @@ public synchronized void update (Graphics pg) {
 	int vMapX = viewMapX;
 	int vMapY = viewMapY;
 	int sc = scale;
-	// Timer zurï¿½cksetzen
+	// Timer zurücksetzen
 	updateTimer.reset();
 	// selektiertes Objekt bestimmen
 	DrawableObject oldSelectedObject = drawableObjects.getSelectedObject();
@@ -1272,7 +1272,7 @@ public synchronized void update (Graphics pg) {
 	g.setClip (0,0, viewWidth,viewHeight);
 	g.setColor (Color.black);
 	g.drawRect (0,0, viewWidth-1,viewHeight-1);
-	// Maï¿½stab setzen
+	// Maßstab setzen
 	getScaleLabel().setText("1 : "+String.valueOf(sc*baseScaleFactor));
 	// Darstellung sichtbar machen
 	pg.drawImage (doubleBuffer, viewX,viewY, this);

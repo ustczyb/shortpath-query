@@ -14,85 +14,85 @@ public interface EntryInput {
 	
 
 /**
- * Gibt zurï¿½ck, ob das Ende des Streams / der Datei erreicht wurde.
+ * Gibt zurück, ob das Ende des Streams / der Datei erreicht wurde.
  * @return Ende erreicht?
  */
-public boolean eof();
+public boolean eof ();
 /**
- * Gibt zurï¿½ck, ob das Ende der Zeile erreicht wurde.
+ * Gibt zurück, ob das Ende der Zeile erreicht wurde.
  * @return Ende erreicht?
  */
-public boolean eol();
+public boolean eol ();
 /**
- * Gibt zurï¿½ck, ob bei der letzten Lese-Operation ein numerischer Fehler erfolgt ist.
+ * Gibt zurück, ob bei der letzten Lese-Operation ein numerischer Fehler erfolgt ist.
  * @return numerischer Fehler?
  */
-public boolean numErr();
+public boolean numErr ();
 /**
  * Liest einen Boolean. Dabei entspricht 1 true; ansonsten wird false geliefert.
  * @return der gelesene Wert
  */
-public boolean readBoolean();
+public boolean readBoolean ();
 /**
  * Liest ein Zeichen.
  * @return das gelesene Zeichen
  */
-public char readChar();
+public char readChar ();
 /**
- * Liest eine Double-Zahl. Tritt ein Fehler auf, wird 0 zurï¿½ckgegeben
- * und errNum() gibt true zurï¿½ck.
+ * Liest eine Double-Zahl. Tritt ein Fehler auf, wird 0 zurückgegeben
+ * und errNum() gibt true zurück.
  * @return die gelesene Zahl
  */
-public double readDouble();
+public double readDouble ();
 /**
- * Liest eine Integer-Zahl. Tritt ein Fehler auf, wird 0 zurï¿½ckgegeben
- * und errNum() gibt true zurï¿½ck.
+ * Liest eine Integer-Zahl. Tritt ein Fehler auf, wird 0 zurückgegeben
+ * und errNum() gibt true zurück.
  * @return die gelesene Zahl
  */
-public int readInt();
+public int readInt ();
 /**
- * Liest eine Long-Zahl. Tritt ein Fehler auf, wird 0 zurï¿½ckgegeben
- * und errNum() gibt true zurï¿½ck.
+ * Liest eine Long-Zahl. Tritt ein Fehler auf, wird 0 zurückgegeben
+ * und errNum() gibt true zurück.
  * @return die gelesene Zahl
  */
-public long readLong();
+public long readLong ();
 /**
- * Liest eine Long-Zahl. Tritt ein Fehler auf, wird 0 zurï¿½ckgegeben
- * und errNum() gibt true zurï¿½ck.
+ * Liest eine Long-Zahl. Tritt ein Fehler auf, wird 0 zurückgegeben
+ * und errNum() gibt true zurück.
  * @return die gelesene Zahl
  */
-public short readShort();
+public short readShort ();
 /**
  * Liest eine Zeichenkette ein.
  * @return eingelesene Zeichenkette; ggf. null
  */
-public String readString();
+public String readString ();
 /**
- * Liest ein Wort, das aus 2 Byte besteht zurï¿½ck.
- * Wird das Dateiende ï¿½berschritte, wird 0 zurï¿½ckgegeben.
+ * Liest ein Wort, das aus 2 Byte besteht zurück.
+ * Wird das Dateiende überschritte, wird 0 zurückgegeben.
  * @return der gelesene Wert als vorzeichenbehaftete Zahl
  */
-public short readWord2();
+public short readWord2 ();
 /**
- * Liest ein Wort, das aus 4 Byte besteht zurï¿½ck.
- * Wird das Dateiende ï¿½berschritten, wird 0 zurï¿½ckgegeben.
+ * Liest ein Wort, das aus 4 Byte besteht zurück.
+ * Wird das Dateiende überschritten, wird 0 zurückgegeben.
  * @return der gelesene Wert als vorzeichenbehaftete Zahl
  */
-public int readWord4();
+public int readWord4 ();
 /**
- * Setzt die Lï¿½nge des nï¿½chsten einzulesenden Eintrags.
- * @param length Eintragslï¿½nge, 0 = beliebig
+ * Setzt die Länge des nächsten einzulesenden Eintrags.
+ * @param length Eintragslänge, 0 = beliebig
  */
-public void setNextEntryLength(int length);
+public void setNextEntryLength (int length);
 /**
- * Setzt das Abschluï¿½zeichen (Default = '\t').
- * @param t Abschluï¿½zeichen
+ * Setzt das Abschlußzeichen (Default = '\t').
+ * @param t Abschlußzeichen
  */
-public void setTerminatingChar(char t);
+public void setTerminatingChar (char t);
 /**
- * ï¿½berspringt n Zeichen.
- * @return Anzahl der tatsï¿½chlich ï¿½bersprungenen Zeichen
+ * Überspringt n Zeichen.
+ * @return Anzahl der tatsächlich übersprungenen Zeichen
  * @param n Anzahl der Zeichen
  */
-public long skip(long n) throws IOException;
+public long skip (long n) throws IOException;
 }

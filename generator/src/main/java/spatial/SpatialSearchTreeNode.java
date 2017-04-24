@@ -20,24 +20,24 @@ public interface SpatialSearchTreeNode extends SpatialSearchTreeEntry {
 	 * @return  the child node
 	 * @param  index  index of the child
 	 */
-	SpatialSearchTreeNode getChildNode(int index);
+	SpatialSearchTreeNode getChildNode (int index);
 	/**
 	 * Returns the entry in a node.
 	 * @return  the entry
 	 * @param  index  index of the entry
 	 */
-	SpatialSearchTreeEntry getEntry(int index);
+	SpatialSearchTreeEntry getEntry (int index);
 	/**
 	 * Returns the minimum bounding box of an entry in a node.
 	 * @return  the rectangle
 	 * @param  index  index of the entry
 	 */
-	MBR getEntryMBR(int index);
+	MBR getEntryMBR (int index);
 	/**
 	 * Returns the height of the block.
 	 * @return  the height
 	 */
-	int getHeight();
+	int getHeight ();
 	/**
 	 * Returns the maximum number of entries in a non-leaf node.
 	 * @return  the maximum number of entries
@@ -47,23 +47,23 @@ public interface SpatialSearchTreeNode extends SpatialSearchTreeEntry {
 	 * Returns the number of entries in the node.
 	 * @return  the number of entries
 	 */
-	int getNumberOfEntries();
+	int getNumberOfEntries ();
 	/**
 	 * Returns the object of a leaf node.
 	 * @return  the object
 	 * @param  index  index of the object
 	 */
-	SpatialSearchTreeObject getObject(int index);
+	SpatialSearchTreeObject getObject (int index);
 	/**
 	 * Returns the tree the node belongs to.
 	 * @return  the tree
 	 */
-	SpatialSearchTree getTree();
+	SpatialSearchTree getTree ();
 	/**
 	 * Returns whether the node is a leaf or not.
 	 * @return  is it a leaf?
 	 */
-	boolean isLeaf();
+	boolean isLeaf ();
 	/**
 	 * Returns whether the node is a root node or not.
 	 * @return  true if it is the root node
@@ -73,7 +73,7 @@ public interface SpatialSearchTreeNode extends SpatialSearchTreeEntry {
 	 * Removes the object with a given index.
 	 * @param  index  index of the object
 	 */
-	void removeObject(int index);
+	void removeObject (int index);
 	/**
 	 * Resets the lock.
 	 */
@@ -87,11 +87,11 @@ public interface SpatialSearchTreeNode extends SpatialSearchTreeEntry {
 	 * @param  entry  the new entry
 	 * @param  i  the index
 	 */
-	void setEntry(SpatialSearchTreeEntry entry, int i);
+	void setEntry (SpatialSearchTreeEntry entry, int i);
 	/**
 	 * Simulates an update of the object with a given index.
 	 * @param  index  index of the object
 	 */
-	void updateObject(int index);
+	void updateObject (int index);
 
 }

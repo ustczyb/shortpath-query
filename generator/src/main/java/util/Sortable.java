@@ -9,9 +9,9 @@ package util;
 public interface Sortable {
 
 /**
- * Vergleich, ob das Objekt kleiner als das ï¿½bergebene Objekt ist.
+ * Vergleich, ob das Objekt kleiner als das übergebene Objekt ist.
  * @return kleiner?
  * @param obj Vergleichsobjekt
  */
-public boolean less(Object obj);
+public boolean less (Object obj);
 }

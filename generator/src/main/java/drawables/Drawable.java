@@ -45,6 +45,22 @@ public abstract class Drawable implements Serializable, EntryReadable {
 	 */
 	public static final byte BITMAPLAYER = 4;
 	/**
+	 * Standard layer for line primitives for buildings
+	 */
+	public static final byte BUILDINGLAYER = 5;
+	/**
+	 * Standard layer for indoor lines in buildings
+	 */
+	public static final byte INSIDELAYER = 6;
+	/**
+	 * Standard layer for dwelling lines in buildings
+	 */
+	public static final byte DWELLINGLAYER = 7;
+	/**
+	 * Standard layer for moving objects
+	 */
+	public static final byte OBJECTLAYER = 8;
+	/**
 	 * Default for the least detailed scale.
 	 */
 	public static final int DEFMINSCALE = Integer.MAX_VALUE; 

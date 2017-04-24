@@ -17,7 +17,7 @@ void close();
  * Returns the height of the tree.
  * @return height
  */
-public int getHeight();
+public int getHeight ();
 /**
  * Returns the number of dimensions.
  * @return  the number of dimensions
@@ -27,16 +27,16 @@ public int getNumOfDimensions();
  * Returns the root. Must be used as starting point of queries. 
  * @return root
  */
-SpatialSearchTreeNode getRoot();
+SpatialSearchTreeNode getRoot ();
 /**
  * Inserts the object into the tree.
  * @param obj spatial searchtree object
  */
-void insert(SpatialSearchTreeObject obj);
+void insert (SpatialSearchTreeObject obj);
 /**
  * Removes an object from the tree.
  * @return was an object removed?
  * @param obj the object
  */
-boolean remove(SpatialSearchTreeObject obj);
+boolean remove (SpatialSearchTreeObject obj);
 }
