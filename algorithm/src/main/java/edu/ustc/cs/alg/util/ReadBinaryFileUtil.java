@@ -1,15 +1,11 @@
 package edu.ustc.cs.alg.util;
 
 
-import edu.ustc.cs.alg.model.dto.EdgeAdapter;
-import edu.ustc.cs.alg.model.dto.GraphBundle;
+import edu.ustc.cs.alg.model.edge.EdgeAdapter;
 import edu.ustc.cs.alg.model.graph.*;
 import edu.ustc.cs.alg.model.vertex.VertexAdapter;
 import org.jgrapht.Graph;
-import org.jgrapht.graph.AbstractBaseGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-
-import util.Utility;
 
 import java.io.*;
 import java.util.*;
@@ -99,7 +95,7 @@ public class ReadBinaryFileUtil {
                     //室内图或室内室外相连的边
                     Building building = buildingTable.get(edge.getTarget().getId());
                     building.getGraph().addEdge(edge.getSource(),edge.getTarget(),edge);
-                    building.getGraph().addEdge(edge.getSource(),edge.getTarget(),edge.reverse());
+                    building.getGraph().addEdge(edge.getTarget(),edge.getSource(),edge.reverse());
                 }
             } else{
                 //建筑物之间相连的边
@@ -109,7 +105,7 @@ public class ReadBinaryFileUtil {
                 edge.setLength(Double.valueOf(lineInfo[4]));
                 Building building = buildingTable.get(edge.getTarget().getId());
                 building.getGraph().addEdge(edge.getSource(),edge.getTarget(),edge);
-                building.getGraph().addEdge(edge.getSource(),edge.getTarget(),edge.reverse());
+                building.getGraph().addEdge(edge.getTarget(),edge.getSource(),edge.reverse());
 
             }
         }
