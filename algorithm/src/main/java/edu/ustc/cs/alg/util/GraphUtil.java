@@ -1,5 +1,6 @@
 package edu.ustc.cs.alg.util;
 
+import edu.ustc.cs.alg.model.edge.Edge;
 import org.jgrapht.Graph;
 
 import java.util.Hashtable;
@@ -20,6 +21,17 @@ public class GraphUtil {
         return hashtable;
     }
 
+    /*
+    把b图添加到a图中
+     */
+    public static <V, E> void addGraph(Graph<V, Edge> a, Graph<V, Edge> b){
+        for(V v :b.vertexSet()){
+            a.addVertex(v);
+        }
+        for(Edge<V> e : b.edgeSet()){
+            a.addEdge(e.getSource(),e.getTarget(),e);
+        }
+    }
 
 
 }

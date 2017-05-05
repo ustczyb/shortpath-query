@@ -1,16 +1,13 @@
 package edu.ustc.cs.alg;
 
-import edu.ustc.cs.alg.model.dto.EdgeAdapter;
+import edu.ustc.cs.alg.model.edge.EdgeAdapter;
 import edu.ustc.cs.alg.model.graph.Building;
 import edu.ustc.cs.alg.model.path.ShortestPath;
 import edu.ustc.cs.alg.model.vertex.VertexAdapter;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Hashtable;
 import java.util.Scanner;
 

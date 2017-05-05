@@ -4,7 +4,6 @@ package edu.ustc.cs.alg.alg;
 import edu.ustc.cs.alg.model.edge.ShortCut;
 import edu.ustc.cs.alg.model.vertex.VertexAdapter;
 import edu.ustc.cs.alg.util.FibonacciMap;
-import edu.ustc.cs.alg.model.dto.Priority;
 import edu.ustc.cs.alg.model.edge.Edge;
 import edu.ustc.cs.alg.model.edge.WeightEdge;
 import edu.ustc.cs.alg.model.path.ShortestPath;
@@ -17,33 +16,49 @@ import org.jgrapht.alg.shortestpath.BidirectionalDijkstraShortestPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.alg.shortestpath.ListSingleSourcePathsImpl;
 import org.jgrapht.graph.AbstractBaseGraph;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
+import java.io.*;
 import java.util.*;
 
 /**
  * Created by zyb on 2017/2/22.
  */
-public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
+public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializable {
 
     private List<V> order;
     private Graph<V, Edge> graph;
     private Graph<V,Edge> originalGraph;
-    private DijkstraShortestPath<V, Edge> dijkstra;
 
     //计算edge difference的域对象
-    private PriorityQueue<Priority> edgeDifference;
 
-    public CH(List<V> order, AbstractBaseGraph<V, Edge> graph) {
+    public void writeObject(String dirName) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dirName + "\\order.obj"));
+        oos.writeObject((ArrayList<V>)order);
+        oos.close();
+        oos = new ObjectOutputStream(new FileOutputStream(dirName + "\\graph.obj"));
+        oos.writeObject((DefaultDirectedWeightedGraph<V,Edge>)graph);
+        oos.close();
+    }
+
+    public static CH readObject(String dirName) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dirName + "\\order.obj"));
+        List order = (List) ois.readObject();
+        ois.close();
+        ois = new ObjectInputStream((new FileInputStream(dirName + "\\graph.obj")));
+        DefaultDirectedWeightedGraph graph = (DefaultDirectedWeightedGraph) ois.readObject();
+        CH result = new CH(order,graph);
+        return result;
+    }
+
+    public CH(List<V> order, Graph<V, Edge> graph) {
         this.order = order;
-        this.originalGraph = graph;
-        this.graph = (Graph<V, Edge>) graph.clone();
-        dijkstra = new DijkstraShortestPath<V, Edge>(graph);
+        this.graph = graph;
     }
 
     public CH(AbstractBaseGraph<V, Edge> graph){
         this.originalGraph = graph;
         this.graph = (Graph<V, Edge>) graph.clone();
-        dijkstra = new DijkstraShortestPath<V, Edge>(graph);
         this.order = new ArrayList<V>(graph.vertexSet().size());
     }
 
@@ -85,6 +100,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                     list.addAll(outGoningEdge.getVertexs());
                     shortCut.setPath(list);
                     graph.addEdge(u,w,shortCut);
+
                 } else {
                     continue;
                 }
@@ -161,7 +177,13 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
     private Set<Edge> getOutGoingEdges(V v){
         Set<Edge> set = null;
         if(graph instanceof DirectedGraph){
-            set = ((DirectedGraph) graph).outgoingEdgesOf(v);
+            set = new HashSet<>();
+            Set<Edge> allEdges = graph.edgesOf(v);
+            for(Edge edge : allEdges){
+                if(edge.getSource() == v){
+                    set.add(edge);
+                }
+            }
         } else{
             set = graph.edgesOf(v);
         }
@@ -171,7 +193,13 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
     private Set<Edge> getInCommingEdges(V v){
         Set<Edge> set = null;
         if(graph instanceof DirectedGraph){
-            set = ((DirectedGraph) graph).incomingEdgesOf(v);
+            set = new HashSet<>();
+            Set<Edge> allEdges = graph.edgesOf(v);
+            for(Edge edge : allEdges){
+                if(edge.getTarget() == v){
+                    set.add(edge);
+                }
+            }
         } else{
             set = graph.edgesOf(v);
         }
@@ -297,6 +325,15 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E> {
                 List<V> list = new ArrayList<V>(1);
                 list.add(source);
                 return new ShortestPath(list,null,0.0);
+            }
+
+            if(!graph.containsVertex(source)){
+                System.out.println("source doesn't contain" + source);
+                return null;
+            }
+            if(!graph.containsVertex(sink)){
+                System.out.println("target doesn't contain" + sink);
+                return null;
             }
 
             fordDistTo = new double[numOfVertex];

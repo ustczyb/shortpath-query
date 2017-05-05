@@ -1,6 +1,5 @@
-package edu.ustc.cs.alg.model.dto;
+package edu.ustc.cs.alg.model.edge;
 
-import edu.ustc.cs.alg.model.edge.Edge;
 import edu.ustc.cs.alg.model.vertex.VertexAdapter;
 import lombok.Getter;
 import lombok.Setter;
