@@ -19,7 +19,7 @@ public class SpatialNetworkTest {
 
     @Before
     public void init() throws FileNotFoundException {
-        spatialNetwork = ReadBinaryFileUtil.file2graph("F:\\code\\Code\\UrbanGen\\dataset\\");
+        spatialNetwork = ReadBinaryFileUtil.file2graph("dataset/");
         spatialNetwork.init();
     }
 
