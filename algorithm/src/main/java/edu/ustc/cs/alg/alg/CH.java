@@ -80,7 +80,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             }
             for(Edge outGoningEdge : outGoningEdges){
                 V w = (V) outGoningEdge.getTarget();
-                if(order.contains(w) || w == u){
+                if(order.contains(w) || w.equals(u)){
                     continue;
                 }
                 Edge u2w = graph.getEdge(u,w);
@@ -145,6 +145,13 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return count;
     }
 
+    public void init(List<V> order){
+        this.order = order;
+        for(V v : order){
+            contract(v);
+        }
+    }
+
     public void init(){
         System.out.println("init method running ...");
         FibonacciMap<V> sortMap = new FibonacciMap<V>();
@@ -156,7 +163,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             contract(nextOrderedVertex);
 
             for(Edge edge : graph.edgesOf(nextOrderedVertex)){
-                V adjVertex = (V) edge.getAnotherVertex(nextOrderedVertex);
+                V adjVertex = (V) edge.getTarget();
                 if(!order.contains(adjVertex)){
                     sortMap.put(adjVertex,calculateEdgeDifference(adjVertex));
                 }
@@ -180,7 +187,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             set = new HashSet<>();
             Set<Edge> allEdges = graph.edgesOf(v);
             for(Edge edge : allEdges){
-                if(edge.getSource() == v){
+                if(edge.getSource().equals(v)){
                     set.add(edge);
                 }
             }
@@ -196,7 +203,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             set = new HashSet<>();
             Set<Edge> allEdges = graph.edgesOf(v);
             for(Edge edge : allEdges){
-                if(edge.getTarget() == v){
+                if(edge.getTarget().equals(v)){
                     set.add(edge);
                 }
             }
@@ -321,7 +328,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
 
         public ShortestPath getPath(V source, V sink){
 
-            if(source == sink){
+            if(source.equals(sink)){
                 List<V> list = new ArrayList<V>(1);
                 list.add(source);
                 return new ShortestPath(list,null,0.0);
@@ -362,7 +369,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             sinkQueue.add(new WeightEdge(sink, sink, 0.0));
 
             //双向搜索需要注意的一点是：当前向搜索路径和后向搜索路径相遇时并不意味着找到了最短路径
-            //只有当前向和后向的优先队列均排空才意味着搜索结束
+
             while(!sourceQueue.isEmpty() || !sinkQueue.isEmpty()){
                 //source搜索
                 if(!sourceQueue.isEmpty()){
@@ -385,10 +392,36 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
                             edgeList.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        ShortestPath path = new ShortestPath(edgeList);
-                        if(result == null || result.getWeight() > path.getWeight()){
-                            result = path;
+                        //前向后向相遇的路径
+                        result = new ShortestPath(edgeList);
+                        for(V e : sourceList){
+                            for(V f : sinkList){
+                                if(graph.containsEdge(e,f)){
+                                    int eIndex = indexOfVertex(e);
+                                    int fIndex = indexOfVertex(f);
+                                    double weight = fordDistTo[eIndex] + backDistTo[fIndex] + graph.getEdge(e,f).getLength();
+                                    if(weight < result.getWeight()){
+                                        edgeList.clear();
+                                        V eTemp = e;
+                                        V fTemp = f;
+                                        while(!eTemp.equals(fordVexTo[eIndex])){
+                                            eTemp = fordVexTo[eIndex];
+                                            edgeList.add(fordEdgeTo[eIndex]);
+                                            eIndex = indexOfVertex(eTemp);
+                                        }
+                                        Collections.reverse(edgeList);
+                                        while(!fTemp.equals(backVexTo[fIndex])){
+                                            fTemp = backVexTo[fIndex];
+                                            edgeList.add(backEdgeTo[fIndex]);
+                                            fIndex = indexOfVertex(fTemp);
+                                        }
+                                        result = new ShortestPath(edgeList);
+                                    }
+                                }
+                            }
                         }
+                        return result;
+
                     } else{
                         sourceList.add(sourceV);
                         relax(sourceV, sourceQueue, true);
@@ -416,10 +449,34 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
                             edgeList.add(backEdgeTo[index]);
                             index = indexOfVertex(v);
                         }
-                        ShortestPath path = new ShortestPath(edgeList);
-                        if(result == null || result.getWeight() > path.getWeight()){
-                            result = path;
+                        result = new ShortestPath(edgeList);
+                        for(V e : sourceList){
+                            for(V f : sinkList){
+                                if(graph.containsEdge(e,f)){
+                                    int eIndex = indexOfVertex(e);
+                                    int fIndex = indexOfVertex(f);
+                                    double weight = fordDistTo[eIndex] + backDistTo[fIndex] + graph.getEdge(e,f).getLength();
+                                    if(weight < result.getWeight()){
+                                        edgeList.clear();
+                                        V eTemp = e;
+                                        V fTemp = f;
+                                        while(!eTemp.equals(fordVexTo[eIndex])){
+                                            eTemp = fordVexTo[eIndex];
+                                            edgeList.add(fordEdgeTo[eIndex]);
+                                            eIndex = indexOfVertex(eTemp);
+                                        }
+                                        Collections.reverse(edgeList);
+                                        while(!fTemp.equals(backVexTo[fIndex])){
+                                            fTemp = backVexTo[fIndex];
+                                            edgeList.add(backEdgeTo[fIndex]);
+                                            fIndex = indexOfVertex(fTemp);
+                                        }
+                                        result = new ShortestPath(edgeList);
+                                    }
+                                }
+                            }
                         }
+                        return result;
                     }
                     sinkList.add(sinkV);
                     relax(sinkV, sinkQueue, false);

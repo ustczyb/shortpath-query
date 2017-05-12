@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
 import java.util.HashSet;
@@ -41,6 +42,8 @@ public class SpatialTNR {
     protected int n;
 
     private Hashtable<Long, Building> buildingHashtable;
+
+    private DijkstraShortestPath<Node,Edge> dijkstraShortestPath;
 
     Hashtable<Building, Block> buildingBlockHashtable;
 
@@ -148,8 +151,9 @@ public class SpatialTNR {
     }
 
     public void init(){
-        ch = new CH(network);
-        ch.init();
+//        ch = new CH(network);
+//        ch.init();
+        dijkstraShortestPath = new DijkstraShortestPath<Node, Edge>(network);
     }
 
     private Block belongTo(@NotNull Node node){
@@ -185,8 +189,8 @@ public class SpatialTNR {
            //     try{
 
                     ShortestPath path1 = sourceBlock.getPath(source, sourceTransNode);
-                    //         GraphPath graphPath = dijkstraShortestPath.getPath(sourceTransNode, targetTransNode);
-                    ShortestPath path2 = ch.getPath(sourceTransNode, targetTransNode);
+                    GraphPath graphPath = dijkstraShortestPath.getPath(sourceTransNode, targetTransNode);
+                    ShortestPath path2 = GraphUtil.graphPath2SP(graphPath);
                     ShortestPath path3 = targetBlock.getPath(targetTransNode, target);
                     if(path1 == null || path2 == null || path3 == null){
                         continue;

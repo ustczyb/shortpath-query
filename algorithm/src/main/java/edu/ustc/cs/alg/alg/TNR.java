@@ -147,6 +147,10 @@ public class TNR<V extends Node,E extends Edge> implements ShortestPathStrategy<
         return roadNetwork.containsEdge(source, target);
     }
 
+    public Node getNode(long id){
+        return hashtable.get(id);
+    }
+
     public ShortestPath getPath(long sourceId, long targetId){
         Node source = hashtable.get(sourceId);
         Node target = hashtable.get(targetId);

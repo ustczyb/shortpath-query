@@ -21,14 +21,17 @@ public class SpatialNetworkTest {
 
     @Before
     public void init() throws IOException, ClassNotFoundException {
-        spatialNetwork = ReadBinaryFileUtil.file2graph("F:\\code\\Code\\UrbanGen\\dataset\\");
-        //spatialNetwork.init();
-        spatialNetwork.initFromFile("F:\\test");
+        spatialNetwork = ReadBinaryFileUtil.file2graph("dataset/");
+        long startTime = System.currentTimeMillis();
+        spatialNetwork.init();
+        long endTime = System.currentTimeMillis();
+        System.out.println("init time : " + (endTime - startTime));
+    //    spatialNetwork.initFromFile("dataset/test");
     }
 
     @Test
     public void testWriteCH() throws IOException {
-        spatialNetwork.writeCH("F:\\test");
+        spatialNetwork.writeCH("dataset/test");
     }
 
     @Test
@@ -40,7 +43,10 @@ public class SpatialNetworkTest {
 //            long targetNum = in.nextLong();
             VertexAdapter source = table.get(new Long(13222));
             VertexAdapter target = table.get(new Long(12606));
+            long startTime = System.currentTimeMillis();
             ShortestPath path = spatialNetwork.getPath(source, target);
+            long endTime = System.currentTimeMillis();
+            System.out.println("query time : " + (endTime - startTime));
             System.out.println(path.getVertexList());
 
 

@@ -208,6 +208,11 @@ public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
     }
 
     @Override
+    public ShortestPath getPath(V source, V sink) {
+        return null;
+    }
+
+    @Override
     public List<V> getPathVertex(V source, V sink) {
         List<V> result = new ArrayList<V>();
         Hashtable<V, Path> sourceTable = forwardAccessNodeTable.get(source);
