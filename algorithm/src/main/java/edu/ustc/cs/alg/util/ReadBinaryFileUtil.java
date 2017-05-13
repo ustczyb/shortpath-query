@@ -1,6 +1,7 @@
 package edu.ustc.cs.alg.util;
 
 
+import edu.ustc.cs.alg.model.coordinate.Flat;
 import edu.ustc.cs.alg.model.edge.EdgeAdapter;
 import edu.ustc.cs.alg.model.graph.*;
 import edu.ustc.cs.alg.model.vertex.VertexAdapter;
@@ -25,7 +26,7 @@ public class ReadBinaryFileUtil {
         List<edu.ustc.cs.alg.model.graph.Building> buildings = new ArrayList<>();
         Hashtable<Long, VertexAdapter> nodeTable = new Hashtable<>();
         Hashtable<Long, edu.ustc.cs.alg.model.graph.Building> buildingTable = new Hashtable<>();
-
+        long x1 = Integer.MAX_VALUE,x2 = 0,y1 = Integer.MAX_VALUE,y2 = 0;
         //读取顶点信息
         boolean flag = false;            //用来记录是否需要添加新的building
         //1.构建室外图
@@ -42,6 +43,18 @@ public class ReadBinaryFileUtil {
                 vertex.setFlag(Short.valueOf(lineInfo[5]));
                 vertex.setFloor(Short.valueOf(lineInfo[6]));
                 vertex.setRoomNum(Short.valueOf(lineInfo[7]));
+                if(vertex.getX() < x1){
+                    x1 = vertex.getX();
+                }
+                if(vertex.getX() > x2){
+                    x2 = vertex.getX();
+                }
+                if(vertex.getY() < y1){
+                    y1 = vertex.getY();
+                }
+                if(vertex.getY() > y2){
+                    y2 = vertex.getY();
+                }
                 if(lineInfo[1].equals("*")){
                     //室外图
                     graph.addVertex(vertex);
@@ -76,6 +89,7 @@ public class ReadBinaryFileUtil {
             nodeTable.put(vertex.getId(),vertex);
         }
         nodeScanner.close();
+        Flat flat = Flat.builder().x1(x1).x2(x2).y1(y1).y2(y2).build();
         //读取边信息
         while(edgeScanner.hasNext()){
             String line = edgeScanner.nextLine();
@@ -116,6 +130,7 @@ public class ReadBinaryFileUtil {
         spatialNetwork.setBuildingTable(buildingTable);
         spatialNetwork.setGraph(graph);
         spatialNetwork.setNodeTable(nodeTable);
+        spatialNetwork.setFlat(flat);
         return spatialNetwork;
     }
 

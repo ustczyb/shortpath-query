@@ -3,6 +3,7 @@ package edu.ustc.cs.alg.model.graph;
 import com.sun.istack.internal.NotNull;
 import edu.ustc.cs.alg.alg.CH;
 import edu.ustc.cs.alg.alg.SILC;
+import edu.ustc.cs.alg.model.coordinate.Flat;
 import edu.ustc.cs.alg.model.edge.Edge;
 import edu.ustc.cs.alg.model.edge.ShortCut;
 import edu.ustc.cs.alg.model.path.ShortestPath;
@@ -46,6 +47,8 @@ public class SpatialNetwork implements Serializable {
         id和building的对应关系表
      */
     Hashtable<Long, Building> buildingTable;
+
+    Flat flat;
 
     public void writeCH(String dirName) throws IOException {
         ch.writeObject(dirName);

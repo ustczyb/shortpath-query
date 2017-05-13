@@ -1,7 +1,6 @@
 package edu.ustc.cs.util;
 
 import edu.ustc.cs.alg.alg.CH;
-import edu.ustc.cs.alg.model.dto.GraphBundle;
 import edu.ustc.cs.alg.util.ReadBinaryFileUtil;
 import org.jgrapht.graph.AbstractBaseGraph;
 import org.junit.Test;

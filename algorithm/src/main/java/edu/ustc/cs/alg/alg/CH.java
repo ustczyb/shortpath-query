@@ -155,6 +155,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
             V nextOrderedVertex = sortMap.removeMin();
             contract(nextOrderedVertex);
 
+            //更新刚刚被收缩点邻居的edge difference
             for(Edge edge : graph.edgesOf(nextOrderedVertex)){
                 V adjVertex = (V) edge.getAnotherVertex(nextOrderedVertex);
                 if(!order.contains(adjVertex)){
