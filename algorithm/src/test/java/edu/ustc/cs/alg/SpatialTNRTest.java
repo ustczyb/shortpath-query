@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 /**
  * Created by zyb on 2017/5/4.
@@ -24,10 +25,13 @@ public class SpatialTNRTest {
 
     @Before
     public void init() throws FileNotFoundException {
-        spatialNetwork = ReadBinaryFileUtil.file2graph("F:\\code\\Code\\UrbanGen\\dataset\\");
+        spatialNetwork = ReadBinaryFileUtil.file2graph("dataset/");
         flat = Flat.builder().x1(0l).x2(22000l).y1(0l).y2(31000l).build();
-        tnr = new SpatialTNR(spatialNetwork,flat,20);
+        long startTime = System.currentTimeMillis();
+        tnr = new SpatialTNR(spatialNetwork,flat,10);
         tnr.init();
+        long endTime = System.currentTimeMillis();
+        System.out.println("init time : " + (endTime - startTime));
     }
 
     @Test
@@ -40,7 +44,16 @@ public class SpatialTNRTest {
     public void testSP(){
         long sourceId = 7442l;
         long targetId = 162674l;
-        ShortestPath sp = tnr.getPath(sourceId, targetId);
-        System.out.println(sp.getVertexList());
+//        Scanner scanner = new Scanner(System.in);
+//        while(true){
+//            sourceId = scanner.nextLong();
+//            targetId = scanner.nextLong();
+            long startTime = System.currentTimeMillis();
+            ShortestPath sp = tnr.getPath(sourceId, targetId);
+            long endTime = System.currentTimeMillis();
+            System.out.println("query time : " + (endTime - startTime));
+            System.out.println(sp.getVertexList());
+//        }
+
     }
 }

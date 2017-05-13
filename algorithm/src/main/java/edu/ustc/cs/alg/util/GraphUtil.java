@@ -1,7 +1,9 @@
 package edu.ustc.cs.alg.util;
 
 import edu.ustc.cs.alg.model.edge.Edge;
+import edu.ustc.cs.alg.model.path.ShortestPath;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 
 import java.util.Hashtable;
 import java.util.Set;
@@ -31,6 +33,10 @@ public class GraphUtil {
         for(Edge<V> e : b.edgeSet()){
             a.addEdge(e.getSource(),e.getTarget(),e);
         }
+    }
+
+    public static ShortestPath graphPath2SP(GraphPath graphPath){
+        return new ShortestPath(graphPath.getVertexList(),graphPath.getEdgeList(),graphPath.getWeight());
     }
 
 

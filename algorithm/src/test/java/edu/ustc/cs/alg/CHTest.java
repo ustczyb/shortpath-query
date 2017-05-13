@@ -1,8 +1,10 @@
 package edu.ustc.cs.alg;
 
 import edu.ustc.cs.alg.alg.CH;
+import edu.ustc.cs.alg.alg.Dijkstra;
 import edu.ustc.cs.alg.model.edge.Edge;
 import edu.ustc.cs.alg.model.edge.WeightEdge;
+import edu.ustc.cs.alg.model.path.ShortestPath;
 import org.jgrapht.WeightedGraph;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.AbstractBaseGraph;
@@ -28,13 +30,14 @@ public class CHTest {
 
     WeightedGraph<Integer, Edge> graph;
     CH<Integer,Edge> ch;
+    Dijkstra<Integer,Edge> dijkstra;
     long starttime;
 
     @Before
     public void before() throws Exception {
         List<Integer> order = new ArrayList<>();
         graph = new DefaultDirectedWeightedGraph<Integer, Edge>(WeightEdge.class);
-        File input = new File("F:\\java\\algs4-data\\algs4-data\\tinyEWD.txt");
+        File input = new File("dataset/mediumEWD.txt");
         Scanner in = new Scanner(input);
         int num = in.nextInt();
         for(int i = 0; i < num; i++){           //添加顶点
@@ -50,6 +53,8 @@ public class CHTest {
             graph.addEdge(v,w,edge);
         }
         in.close();
+
+       dijkstra = new Dijkstra((DefaultDirectedWeightedGraph) graph);
 
         ch = new CH<Integer,Edge>((AbstractBaseGraph<Integer, Edge>) graph);
         long startTime = System.currentTimeMillis();
@@ -98,22 +103,23 @@ public class CHTest {
     public void testQueryShortPath() throws Exception {
 
         DijkstraShortestPath dijkstraShortestPath = new DijkstraShortestPath(graph);
-        for(Integer v : graph.vertexSet()){
-            for(Integer w : graph.vertexSet()){
-                if(!v.equals(w)){
-                    List<Integer> list = ch.getPathVertex(v,w);
-                    System.out.println(list);
-               //     System.out.println(dijkstraShortestPath.getPathVertex(v,w).getVertexList());
-                }
-            }
-        }
+//        for(Integer v : graph.vertexSet()){
+//            for(Integer w : graph.vertexSet()){
+//                if(!v.equals(w)){
+//                    List<Integer> list = dijkstra.getPathVertex(v,w);
+//                    System.out.println(list);
+//                    System.out.println(dijkstraShortestPath.getPath(v,w).getVertexList());
+//                }
+//            }
+//        }
         long startTime = System.currentTimeMillis();
-   //     System.out.println(dijkstraShortestPath.getPath(4,2).getVertexList());
+        System.out.println(dijkstraShortestPath.getPath(4,2).getVertexList() +" " + dijkstraShortestPath.getPath(4,2).getWeight());
         long endTime = System.currentTimeMillis();
-  //      System.out.println("Dijkstra Run Time : " + (endTime - startTime));
+        System.out.println("Dijkstra Run Time : " + (endTime - startTime));
 
         startTime = System.currentTimeMillis();
-        System.out.println(ch.getPathVertex(4, 2));
+        ShortestPath shortestPath = dijkstra.getPath(4,2);
+        System.out.println(shortestPath.getVertexList() + " " + shortestPath.getWeight());
         endTime = System.currentTimeMillis();
         System.out.println("CH Run Time : " + (endTime - startTime));
 
