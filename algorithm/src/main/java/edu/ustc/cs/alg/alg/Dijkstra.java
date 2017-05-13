@@ -71,7 +71,7 @@ public class Dijkstra<V, E extends Edge> implements ShortestPathStrategy<V, Edge
 
     private void relaxNode(V v){
         for(Edge<V> edge : graph.edgesOf(v)){
-            if(edge.getSource() == v){
+            if(edge.getSource().equals(v) ){
                 relax(edge);
             }
         }

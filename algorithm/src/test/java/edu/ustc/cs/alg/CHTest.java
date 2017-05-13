@@ -1,5 +1,6 @@
 package edu.ustc.cs.alg;
 
+import edu.ustc.cs.alg.alg.BiDijkstra;
 import edu.ustc.cs.alg.alg.CH;
 import edu.ustc.cs.alg.alg.Dijkstra;
 import edu.ustc.cs.alg.model.edge.Edge;
@@ -31,6 +32,7 @@ public class CHTest {
     WeightedGraph<Integer, Edge> graph;
     CH<Integer,Edge> ch;
     Dijkstra<Integer,Edge> dijkstra;
+    BiDijkstra<Integer, Edge> biDijkstra;
     long starttime;
 
     @Before
@@ -54,8 +56,8 @@ public class CHTest {
         }
         in.close();
 
-       dijkstra = new Dijkstra((DefaultDirectedWeightedGraph) graph);
-
+   //    dijkstra = new Dijkstra((DefaultDirectedWeightedGraph) graph);
+        biDijkstra = new BiDijkstra<>((DefaultDirectedWeightedGraph<Integer, Edge>) graph);
         ch = new CH<Integer,Edge>((AbstractBaseGraph<Integer, Edge>) graph);
         long startTime = System.currentTimeMillis();
         ch.init();
@@ -106,19 +108,19 @@ public class CHTest {
 //        for(Integer v : graph.vertexSet()){
 //            for(Integer w : graph.vertexSet()){
 //                if(!v.equals(w)){
-//                    List<Integer> list = dijkstra.getPathVertex(v,w);
+//                    List<Integer> list = biDijkstra.getPathVertex(v,w);
 //                    System.out.println(list);
 //                    System.out.println(dijkstraShortestPath.getPath(v,w).getVertexList());
 //                }
 //            }
 //        }
         long startTime = System.currentTimeMillis();
-        System.out.println(dijkstraShortestPath.getPath(4,2).getVertexList() +" " + dijkstraShortestPath.getPath(4,2).getWeight());
+        System.out.println(biDijkstra.getPath(40,22).getVertexList());
         long endTime = System.currentTimeMillis();
-        System.out.println("Dijkstra Run Time : " + (endTime - startTime));
+  //      System.out.println("Dijkstra Run Time : " + (endTime - startTime));
 
         startTime = System.currentTimeMillis();
-        ShortestPath shortestPath = dijkstra.getPath(4,2);
+        ShortestPath shortestPath = ch.getPath(40,22);
         System.out.println(shortestPath.getVertexList() + " " + shortestPath.getWeight());
         endTime = System.currentTimeMillis();
         System.out.println("CH Run Time : " + (endTime - startTime));

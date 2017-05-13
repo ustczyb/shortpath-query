@@ -173,6 +173,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         System.out.println("init method over");
         System.out.println("shortcut num : " + (graph.edgeSet().size() - originalGraph.edgeSet().size()));
     }
+    //TODO CH算法的双向Dijkstra计算incomming upper边集在搜索结束时要分开
 
     private boolean isForwardEdge(Edge<V> edge){
         if(order.indexOf(edge.getSource()) < order.indexOf(edge.getTarget())){
@@ -214,19 +215,19 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return set;
     }
 
-    private List<Edge> getUpperEdgeList(V v){
-        List<Edge> list = new ArrayList<Edge>();
+    private Set<Edge> getUpperEdgeList(V v){
+        Set<Edge> result = new HashSet<>();
         Set<Edge> set = getOutGoingEdges(v);
         for(Edge e : set){
             if(isForwardEdge(e)){
-                list.add(e);
+                result.add(e);
             }
         }
-        return list;
+        return result;
     }
 
-    private List<Edge> getLowerEdgeList(V v){
-        List<Edge> list = new ArrayList<Edge>();
+    private Set<Edge> getLowerEdgeList(V v){
+        Set<Edge> list = new HashSet<>();
         Set<Edge> set = getInCommingEdges(v);
         for(Edge e : set){
             if(!isForwardEdge(e)){
@@ -236,8 +237,8 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return list;
     }
 
-    public BiDijkstra getInstense(){
-        return new BiDijkstra();
+    private BiDijkstra getInstense(){
+        return new BiDijkstra((DefaultDirectedWeightedGraph) graph);
     }
 
     public ShortestPath getPath(V source, V sink){
@@ -245,7 +246,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
     }
 
     public List<V> getPathVertex(V source, V sink){
-        return getInstense().getPathVertexs(source, sink);
+        return getInstense().getPathVertex(source, sink);
     }
 
 
@@ -289,232 +290,129 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return new ListSingleSourcePathsImpl<V,Edge>(graph, source, paths);
     }
 
-    private class BiDijkstra{
+    private class BiDijkstra extends edu.ustc.cs.alg.alg.BiDijkstra<V, Edge>{
 
-        private Hashtable<V,Integer> vertexToInteger;
-        private int numOfVertex;
-
-        private double[] fordDistTo;
-        private Edge[] fordEdgeTo;
-        private V[] fordVexTo;
-
-        private double[] backDistTo;
-        private Edge[] backEdgeTo;
-        private V[] backVexTo;
-
-        public BiDijkstra(){
-            vertexToInteger = GraphUtil.getVexIndex(graph);
-            numOfVertex = vertexToInteger.size();
+        public BiDijkstra(DefaultDirectedWeightedGraph graph) {
+            super(graph);
         }
 
-        private Integer indexOfVertex(V v){
-            return vertexToInteger.get(v);
-        }
+        @Override
+        public ShortestPath getPath(V source, V sink) {
 
-        public List<V> getPathVertexs(V source, V sink){
-            return getPath(source, sink).getVertexList();
-//            List<V> list = new ArrayList<V>();
-//            List<Edge> edges = getPathVertex(source, sink);
-//            for(Edge<V> e : edges){
-//                if(e instanceof ShortCut){
-//                    list.addAll(((ShortCut) e).getPathVertex());
-//                    list.remove(list.size() - 1);
-//                } else {
-//                    list.add(e.getSource());
-//                }
-//            }
-//            list.add(sink);
-//            return list;
-        }
+            Arrays.fill(fordDistTo,Double.MAX_VALUE);
+            fordDistTo[index(source)] = 0.0;
+            Arrays.fill(fordEdgeTo,null);
+            fordVexTo[index(source)] = source;
+            fordFibonacciMap = new FibonacciMap<V>();
+            fordSearchSet = new HashSet<V>();
 
-        public ShortestPath getPath(V source, V sink){
+            Arrays.fill(backDistTo,Double.MAX_VALUE);
+            backDistTo[index(sink)] = 0.0;
+            Arrays.fill(backEdgeTo,null);
+            backVexTo[index(sink)] = sink;
+            backFibonacciMap = new FibonacciMap<V>();
+            backSearchSet = new HashSet<V>();
 
-            if(source.equals(sink)){
-                List<V> list = new ArrayList<V>(1);
-                list.add(source);
-                return new ShortestPath(list,null,0.0);
-            }
+            fordFibonacciMap.put(source,0.0);
+            backFibonacciMap.put(sink,0.0);
 
-            if(!graph.containsVertex(source)){
-                System.out.println("source doesn't contain" + source);
-                return null;
-            }
-            if(!graph.containsVertex(sink)){
-                System.out.println("target doesn't contain" + sink);
-                return null;
-            }
+            while(!fordFibonacciMap.isEmpty() || !backFibonacciMap.isEmpty()){
+                if(!fordFibonacciMap.isEmpty()){
+                    V v = fordFibonacciMap.removeMin();
+                    if(backSearchSet.contains(v)){  //前向搜索和反向搜索相遇
 
-            fordDistTo = new double[numOfVertex];
-            fordVexTo = (V[]) new Object[numOfVertex];
-            fordEdgeTo = new Edge[numOfVertex];
-            for(int i = 0; i < numOfVertex; i++)
-                fordDistTo[i] = Double.POSITIVE_INFINITY;
-            fordDistTo[indexOfVertex(source)] = 0.0;
-            fordVexTo[indexOfVertex(source)] = source;
+                        ShortestPath shortestPath = generatePath(v);
 
-            backDistTo = new double[numOfVertex];
-            backVexTo = (V[]) new Object[numOfVertex];
-            backEdgeTo = new Edge[numOfVertex];
-            for(int i = 0; i < numOfVertex; i++)
-                backDistTo[i] = Double.POSITIVE_INFINITY;
-            backDistTo[indexOfVertex(sink)] = 0.0;
-            backVexTo[indexOfVertex(sink)] = sink;
-
-            ShortestPath result = null;
-            List<V> sourceList = new ArrayList<V>();        //从source搜索过的节点
-            List<V> sinkList = new ArrayList<V>();
-
-            PriorityQueue<Edge<V>> sourceQueue = new PriorityQueue<>();
-            PriorityQueue<Edge<V>> sinkQueue = new PriorityQueue<>();
-            sourceQueue.add(new WeightEdge(source, source,0.0));
-            sinkQueue.add(new WeightEdge(sink, sink, 0.0));
-
-            //双向搜索需要注意的一点是：当前向搜索路径和后向搜索路径相遇时并不意味着找到了最短路径
-
-            while(!sourceQueue.isEmpty() || !sinkQueue.isEmpty()){
-                //source搜索
-                if(!sourceQueue.isEmpty()){
-                    V sourceV = sourceQueue.poll().getTarget();
-                    //前向搜索与后向搜索相遇，记录下这条路径
-                    if(sinkList.contains(sourceV)){
-                        V v = sourceV;
-                        int index = indexOfVertex(sourceV);
-                        List<Edge> edgeList = new ArrayList<Edge>();
-                        while(!v.equals(fordVexTo[index])){
-                            v = fordVexTo[index];
-                            edgeList.add(fordEdgeTo[index]);
-                            index = indexOfVertex(v);
-                        }
-                        Collections.reverse(edgeList);
-                        v = sourceV;
-                        index = indexOfVertex(v);
-                        while(!v.equals(backVexTo[indexOfVertex(v)])){
-                            v = backVexTo[indexOfVertex(v)];
-                            edgeList.add(backEdgeTo[index]);
-                            index = indexOfVertex(v);
-                        }
-                        //前向后向相遇的路径
-                        result = new ShortestPath(edgeList);
-                        for(V e : sourceList){
-                            for(V f : sinkList){
-                                if(graph.containsEdge(e,f)){
-                                    int eIndex = indexOfVertex(e);
-                                    int fIndex = indexOfVertex(f);
-                                    double weight = fordDistTo[eIndex] + backDistTo[fIndex] + graph.getEdge(e,f).getLength();
-                                    if(weight < result.getWeight()){
-                                        edgeList.clear();
-                                        V eTemp = e;
-                                        V fTemp = f;
-                                        while(!eTemp.equals(fordVexTo[eIndex])){
-                                            eTemp = fordVexTo[eIndex];
-                                            edgeList.add(fordEdgeTo[eIndex]);
-                                            eIndex = indexOfVertex(eTemp);
+                        //寻找其他路径
+                        while(!fordFibonacciMap.isEmpty()){
+                            V fordV = fordFibonacciMap.removeMin();
+                            if(backSearchSet.contains(fordV)){
+                                Set<Edge> inCommingEdgeSet = getInCommingEdges(fordV);
+                                for(Edge<V> edge : inCommingEdgeSet){
+                                    V fordNode = edge.getSource();
+                                    if(fordSearchSet.contains(fordNode)){
+                                        double weight = fordDistTo[index(fordNode)] + edge.getLength() + backDistTo[index(fordV)];
+                                        if(weight < shortestPath.getWeight()){
+                                            shortestPath = generatePath(edge);
                                         }
-                                        Collections.reverse(edgeList);
-                                        while(!fTemp.equals(backVexTo[fIndex])){
-                                            fTemp = backVexTo[fIndex];
-                                            edgeList.add(backEdgeTo[fIndex]);
-                                            fIndex = indexOfVertex(fTemp);
-                                        }
-                                        result = new ShortestPath(edgeList);
                                     }
                                 }
                             }
                         }
-                        return result;
-
+                        while(!backFibonacciMap.isEmpty()){
+                            V backV = backFibonacciMap.removeMin();
+                            if(fordSearchSet.contains(backV)){
+                                Set<Edge> outGoingEdgeSet = getOutGoingEdges(backV);
+                                for(Edge<V> edge : outGoingEdgeSet){
+                                    V backNode = edge.getTarget();
+                                    if(backSearchSet.contains(backNode)){
+                                        double weight = backDistTo[index(backNode)] + edge.getLength() + fordDistTo[index(backV)];
+                                        if(weight < shortestPath.getWeight()){
+                                            shortestPath = generatePath(edge);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return shortestPath;
                     } else{
-                        sourceList.add(sourceV);
-                        relax(sourceV, sourceQueue, true);
+                        fordSearchSet.add(v);
+                        relaxNode(v, true);
                     }
-
                 }
-
-                //sink搜索
-                if(!sinkQueue.isEmpty()){
-                    V sinkV = sinkQueue.poll().getSource();
-                    if(sourceList.contains(sinkV)){
-                        V v = sinkV;
-                        int index = indexOfVertex(sinkV);
-                        List<Edge> edgeList = new ArrayList<Edge>();
-                        while(!v.equals(fordVexTo[index])){
-                            v = fordVexTo[index];
-                            edgeList.add(fordEdgeTo[index]);
-                            index = indexOfVertex(v);
-                        }
-                        Collections.reverse(edgeList);
-                        v = sinkV;
-                        index = indexOfVertex(v);
-                        while(!v.equals(backVexTo[indexOfVertex(v)])){
-                            v = backVexTo[indexOfVertex(v)];
-                            edgeList.add(backEdgeTo[index]);
-                            index = indexOfVertex(v);
-                        }
-                        result = new ShortestPath(edgeList);
-                        for(V e : sourceList){
-                            for(V f : sinkList){
-                                if(graph.containsEdge(e,f)){
-                                    int eIndex = indexOfVertex(e);
-                                    int fIndex = indexOfVertex(f);
-                                    double weight = fordDistTo[eIndex] + backDistTo[fIndex] + graph.getEdge(e,f).getLength();
-                                    if(weight < result.getWeight()){
-                                        edgeList.clear();
-                                        V eTemp = e;
-                                        V fTemp = f;
-                                        while(!eTemp.equals(fordVexTo[eIndex])){
-                                            eTemp = fordVexTo[eIndex];
-                                            edgeList.add(fordEdgeTo[eIndex]);
-                                            eIndex = indexOfVertex(eTemp);
+                if(!backFibonacciMap.isEmpty()){
+                    V v = backFibonacciMap.removeMin();
+                    if(fordSearchSet.contains(v)){  //反向搜索与前向搜索相遇
+                        ShortestPath shortestPath = generatePath(v);
+                        //寻找其他路径
+                        while(!backFibonacciMap.isEmpty()){
+                            V backV = backFibonacciMap.removeMin();
+                            if(fordSearchSet.contains(backV)){
+                                Set<Edge> outGoingEdgeSet = getOutGoingEdges(backV);
+                                for(Edge<V> edge : outGoingEdgeSet){
+                                    V backNode = edge.getTarget();
+                                    if(backSearchSet.contains(backNode)){
+                                        double weight = backDistTo[index(backNode)] + edge.getLength() + fordDistTo[index(backV)];
+                                        if(weight < shortestPath.getWeight()){
+                                            shortestPath = generatePath(edge);
                                         }
-                                        Collections.reverse(edgeList);
-                                        while(!fTemp.equals(backVexTo[fIndex])){
-                                            fTemp = backVexTo[fIndex];
-                                            edgeList.add(backEdgeTo[fIndex]);
-                                            fIndex = indexOfVertex(fTemp);
-                                        }
-                                        result = new ShortestPath(edgeList);
                                     }
                                 }
                             }
                         }
-                        return result;
+                        while(!fordFibonacciMap.isEmpty()){
+                            V fordV = fordFibonacciMap.removeMin();
+                            if(backSearchSet.contains(fordV)){
+                                Set<Edge> inCommingEdgeSet = getInCommingEdges(fordV);
+                                for(Edge<V> edge : inCommingEdgeSet){
+                                    V fordNode = edge.getSource();
+                                    if(fordSearchSet.contains(fordNode)){
+                                        double weight = fordDistTo[index(fordNode)] + edge.getLength() + backDistTo[index(fordV)];
+                                        if(weight < shortestPath.getWeight()){
+                                            shortestPath = generatePath(edge);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return shortestPath;
+                    } else{
+                        backSearchSet.add(v);
+                        relaxNode(v, false);
                     }
-                    sinkList.add(sinkV);
-                    relax(sinkV, sinkQueue, false);
                 }
-
             }
-            return result;
+            return null;
         }
 
-        private void relax(V v, PriorityQueue<Edge<V>> pq, boolean isForward){
-            int indexOfV = indexOfVertex(v);
-            List<Edge> list = null;
-            if(isForward){
-                list = getUpperEdgeList(v);
-                for(Edge<V> e : list){
-                    V w = e.getTarget();
-                    int indexOfW = indexOfVertex(w);
-                    if(fordDistTo[indexOfW] > fordDistTo[indexOfV] + e.getLength()) {
-                        fordDistTo[indexOfW] = fordDistTo[indexOfV] + e.getLength();
-                        fordEdgeTo[indexOfW] = e;
-                        fordVexTo[indexOfW] = v;
-                        pq.add(e);
-                    }
-                }
-            } else {
-                list = getLowerEdgeList(v);
-                for(Edge<V> e : list){
-                    V w = e.getSource();
-                    int indexOfW = indexOfVertex(w);
-                    if(backDistTo[indexOfW] > backDistTo[indexOfV] + e.getLength()) {
-                        backDistTo[indexOfW] = backDistTo[indexOfV] + e.getLength();
-                        backEdgeTo[indexOfW] = e;
-                        backVexTo[indexOfW] = v;
-                        pq.add(e);
-                    }
-                }
-            }
+        @Override
+        protected Set<Edge> getInCommingEdge(V o) {
+            return getLowerEdgeList(o);
+        }
+
+        @Override
+        protected Set<Edge> getOutGoingEdge(V o) {
+            return getUpperEdgeList(o);
         }
     }
 
