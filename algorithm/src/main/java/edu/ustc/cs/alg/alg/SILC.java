@@ -4,13 +4,14 @@ import edu.ustc.cs.alg.model.edge.Edge;
 import edu.ustc.cs.alg.model.path.ShortestPath;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 
 import java.util.*;
 
 /**
  * Created by zyb on 2017/3/7.
- * TODO 有向图无向图 图的格式 点的格式（坐标？）
+ *
  */
 public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
 
@@ -29,9 +30,10 @@ public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
         //TODO 有向图的做法
         for(V v : vSet){
             Hashtable<V, HashSet<V>> table = new Hashtable<V, HashSet<V>>();
+            ShortestPathAlgorithm.SingleSourcePaths paths = dijkstra.getPaths(v);
             for(V w : vSet){
                 if(w != v){
-                    GraphPath<V,Edge> path = dijkstra.getPath(v,w);
+                    GraphPath<V,Edge> path = paths.getPath(w);
                     if(path == null){
                         continue;
                     }

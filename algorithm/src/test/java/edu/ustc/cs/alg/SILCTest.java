@@ -24,7 +24,7 @@ public class SILCTest {
     public void before() throws Exception {
         List<Integer> order = new ArrayList<>();
         graph = new SimpleWeightedGraph<Integer, Edge>(WeightEdge.class);
-        File input = new File("F:\\java\\algs4-data\\algs4-data\\tinyEWD.txt");
+        File input = new File("dataset/mediumEWD.txt");
         Scanner in = new Scanner(input);
         int num = in.nextInt();
         for(int i = 0; i < num; i++){           //添加顶点

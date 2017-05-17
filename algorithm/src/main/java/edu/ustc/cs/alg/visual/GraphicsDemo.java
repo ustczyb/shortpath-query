@@ -1,4 +1,4 @@
-package edu.ustc.cs.alg;
+package edu.ustc.cs.alg.visual;
 
 import edu.ustc.cs.alg.model.coordinate.Node;
 import edu.ustc.cs.alg.model.edge.Edge;

@@ -1,4 +1,4 @@
-package edu.ustc.cs.alg;
+package edu.ustc.cs.alg.visual;
 
 import java.awt.*;
 import java.awt.geom.*;

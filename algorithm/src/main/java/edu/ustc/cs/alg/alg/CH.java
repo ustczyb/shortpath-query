@@ -145,10 +145,51 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return count;
     }
 
-    public void init(List<V> order){
+    private void init(List<V> order){
         this.order = order;
         for(V v : order){
-            contract(v);
+            contractByOrder(v);
+        }
+    }
+
+    private void contractByOrder(V v){
+        Set<Edge> inCommingEdges = getInCommingEdges(v);
+        Set<Edge> outGoningEdges = getOutGoingEdges(v);
+        int orderOfV = order.indexOf(v);
+        for(Edge inCommingEdge : inCommingEdges){
+            V u = (V) inCommingEdge.getSource();
+            int orderOfU = order.indexOf(u);
+            if(orderOfU < orderOfV){
+                continue;
+            }
+            for(Edge outGoningEdge : outGoningEdges){
+                V w = (V) outGoningEdge.getTarget();
+                int orderOfW = order.indexOf(w);
+                if(orderOfW < orderOfV || w.equals(u)){
+                    continue;
+                }
+                Edge u2w = graph.getEdge(u,w);
+                double weight = inCommingEdge.getLength() + outGoningEdge.getLength();
+                if(u2w == null || u2w.getLength() > weight){
+                    if(u2w != null){
+                        graph.removeEdge(u2w);
+                    }
+                    //add shortcut
+                    ShortCut<V> shortCut = new ShortCut<V>();
+                    shortCut.setSource(u);
+                    shortCut.setTarget(w);
+                    shortCut.setLength(weight);
+                    List<V> list = new ArrayList<V>();
+                    list.addAll(inCommingEdge.getVertexs());
+                    list.remove(list.size() - 1);
+                    list.addAll(outGoningEdge.getVertexs());
+                    shortCut.setPath(list);
+                    graph.addEdge(u,w,shortCut);
+
+                } else {
+                    continue;
+                }
+            }
         }
     }
 

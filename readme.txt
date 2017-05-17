@@ -1,0 +1,4 @@
+这是一个maven项目，使用前务必安装maven。否则需要手动下载所有依赖的jar包，还可能会出现各种编译错误的问题。
+algorithm模块当中实现了Dijkstra算法，双向Dijkstra算法，CH算法，SILC算法，基于坐标的TNR算法，基于CH算法的TNR方法，室内外一体化的TNR方法的两种实现形式。这些算法在edu.ustc.cs.alg包下。
+图的数据机构我们使用了JGraphT这个三方开源库，里面有各种各样的图数据机构。点和边的数据结构定义在edu.ustc.cs.model包下
+generator模块是由niclas改进的branhoff的generator，这个generator可以根据平面路网生成室内外一体化的图。在生成图时它的速度很慢
