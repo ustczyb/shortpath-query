@@ -26,12 +26,14 @@ import java.util.*;
  */
 public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializable {
 
+    //顶点的顺序
     private List<V> order;
+    //由于CH算法要在图上添加shortcut从而改变原图的结构，因此我们把原图进行clone一份用于进行CH的预处理，虽然只是浅拷贝但是不会对原图产生影响
     private Graph<V, Edge> graph;
+
     private Graph<V,Edge> originalGraph;
 
-    //计算edge difference的域对象
-
+    //将预处理完成的图和顶点顺序序列化
     public void writeObject(String dirName) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dirName + "\\order.obj"));
         oos.writeObject((ArrayList<V>)order);
@@ -40,7 +42,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         oos.writeObject((DefaultDirectedWeightedGraph<V,Edge>)graph);
         oos.close();
     }
-
+    //根据本地文件进行反序列化
     public static CH readObject(String dirName) throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dirName + "\\order.obj"));
         List order = (List) ois.readObject();
@@ -55,11 +57,20 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         this.order = order;
         this.graph = graph;
     }
-
+    //使用默认的顶点排序方式进行预处理
     public CH(AbstractBaseGraph<V, Edge> graph){
         this.originalGraph = graph;
         this.graph = (Graph<V, Edge>) graph.clone();
         this.order = new ArrayList<V>(graph.vertexSet().size());
+        init();
+    }
+
+    //根据给出的顶点顺序进行预处理
+    public CH(AbstractBaseGraph<V, Edge> graph,List<V> order){
+        this.originalGraph = graph;
+        this.graph = (Graph<V, Edge>) graph.clone();
+        this.order = new ArrayList<V>(graph.vertexSet().size());
+        init(order);
     }
 
     public Graph getGraph(){
@@ -70,6 +81,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return order;
     }
 
+    //默认排序方式收缩顶点
     private void contract(V v){
         Set<Edge> inCommingEdges = getInCommingEdges(v);
         Set<Edge> outGoningEdges = getOutGoingEdges(v);
@@ -112,7 +124,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
     /*
     计算顶点v的edge difference
      */
-    public int calculateEdgeDifference(V v){
+    private int calculateEdgeDifference(V v){
         int count = 0;
         Set<Edge> inCommingEdges = getInCommingEdges(v);
         Set<Edge> outGoningEdges = getOutGoingEdges(v);
@@ -331,6 +343,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
         return new ListSingleSourcePathsImpl<V,Edge>(graph, source, paths);
     }
 
+    //CH查询时使用的双向Dijkstra算法
     private class BiDijkstra extends edu.ustc.cs.alg.alg.BiDijkstra<V, Edge>{
 
         public BiDijkstra(DefaultDirectedWeightedGraph graph) {

@@ -9,6 +9,7 @@ import java.util.*;
 
 /**
  * Created by helloworld on 2017/5/11.
+ * Dijkstra算法
  */
 public class Dijkstra<V, E extends Edge> implements ShortestPathStrategy<V, Edge>{
 

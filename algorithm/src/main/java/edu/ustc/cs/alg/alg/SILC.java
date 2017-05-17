@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * Created by zyb on 2017/3/7.
- *
+ * SILC算法
  */
 public class SILC<V,E extends Edge> implements ShortestPathStrategy<V,Edge> {
 

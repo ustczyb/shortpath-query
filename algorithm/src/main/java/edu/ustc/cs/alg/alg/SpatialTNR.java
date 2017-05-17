@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Created by zyb on 2017/5/2.
- * 含建筑物路网的TNR算法
+ * 室内外一体化的TNR算法
  */
 @Getter
 @Setter

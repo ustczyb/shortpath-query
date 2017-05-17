@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * Created by zyb on 2017/3/10.
- * TNR based on CH
+ * 基于CH算法的TNR方法
  */
 public class ChTnr<V,E extends Edge> implements ShortestPathStrategy<V,E> {
 

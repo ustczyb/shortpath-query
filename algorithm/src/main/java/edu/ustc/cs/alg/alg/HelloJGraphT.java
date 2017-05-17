@@ -12,6 +12,7 @@ import java.util.Set;
 
 /**
  * Created by zyb on 2017/2/22.
+ * JGraphT的一个Demo
  */
 public final class HelloJGraphT
 {

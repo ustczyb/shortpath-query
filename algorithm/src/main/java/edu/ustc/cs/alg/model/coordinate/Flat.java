@@ -6,6 +6,7 @@ import lombok.Setter;
 
 /**
  * Created by zyb on 2017/4/25.
+ * 用来表示一个坐标图上的长方形区域
  */
 @Getter
 @Setter

@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Created by zyb on 2017/3/1.
+ * CH算法添加的shortCut，需要说明的是如果使用JGraphT的WeightedEdge图（及其子图），边类必须继承DefaultWeightedEdge并重写getWeight方法，详见JGraphT的文档
  */
 public class ShortCut<V> extends DefaultWeightedEdge implements Edge<V> {
 

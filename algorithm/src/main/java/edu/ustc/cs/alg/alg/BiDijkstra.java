@@ -9,6 +9,7 @@ import java.util.*;
 
 /**
  * Created by zyb on 2017/5/13.
+ * 双向Dijkstra算法
  */
 public class BiDijkstra<V, E extends Edge> implements ShortestPathStrategy<V, Edge> {
 
