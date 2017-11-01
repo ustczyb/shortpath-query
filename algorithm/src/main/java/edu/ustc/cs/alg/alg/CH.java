@@ -124,7 +124,7 @@ public class CH<V, E extends Edge> implements ShortestPathStrategy<V,E>,Serializ
     /*
     计算顶点v的edge difference
      */
-    private int calculateEdgeDifference(V v){
+    public int calculateEdgeDifference(V v){
         int count = 0;
         Set<Edge> inCommingEdges = getInCommingEdges(v);
         Set<Edge> outGoningEdges = getOutGoingEdges(v);

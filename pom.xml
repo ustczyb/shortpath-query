@@ -16,9 +16,7 @@
     </properties>
 
     <modules>
-        <module>generator</module>
         <module>algorithm</module>
-        <module>app</module>
         <module>app</module>
     </modules>
 
